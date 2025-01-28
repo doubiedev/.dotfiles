@@ -1,0 +1,7 @@
+configuration {
+    key-run: "Alt+1";
+    key-window: "Alt+2";
+    key-ssh: "Alt+3";
+    key-drun: "Alt+4";
+}
+
