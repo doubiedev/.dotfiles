@@ -1,0 +1,40 @@
+206c206
+< org.gnome.ControlCenter last-panel 'power'
+---
+> org.gnome.ControlCenter last-panel 'keyboard'
+707c707
+< org.gnome.desktop.wm.keybindings close ['<Alt>F4']
+---
+> org.gnome.desktop.wm.keybindings close ['<Shift><Super>c']
+878c878
+< org.gnome.gedit.plugins active-plugins ['docinfo', 'filebrowser', 'modelines', 'openlinks', 'sort', 'spell']
+---
+> org.gnome.gedit.plugins active-plugins ['openlinks', 'modelines', 'docinfo', 'filebrowser', 'spell', 'sort']
+886c886
+< org.gnome.gedit.plugins.filebrowser root ''
+---
+> org.gnome.gedit.plugins.filebrowser root 'file:///'
+888c888
+< org.gnome.gedit.plugins.filebrowser virtual-root ''
+---
+> org.gnome.gedit.plugins.filebrowser virtual-root 'file:///home/nd'
+945c945
+< org.gnome.gedit.state.window side-panel-active-page ''
+---
+> org.gnome.gedit.state.window side-panel-active-page 'GeditWindowDocumentsPanel'
+948c948
+< org.gnome.gedit.state.window state 0
+---
+> org.gnome.gedit.state.window state 87168
+1347c1347
+< org.gnome.settings-daemon.plugins.media-keys home ['']
+---
+> org.gnome.settings-daemon.plugins.media-keys home ['<Super>f']
+1404c1404
+< org.gnome.settings-daemon.plugins.media-keys terminal ['<Primary><Alt>t']
+---
+> org.gnome.settings-daemon.plugins.media-keys terminal ['<Super>Return']
+1429c1429
+< org.gnome.settings-daemon.plugins.media-keys www ['']
+---
+> org.gnome.settings-daemon.plugins.media-keys www ['<Super>b']

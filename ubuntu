@@ -1,7 +1,6 @@
 #!/bin/bash
 if [[ -z $STOW_FOLDERS ]]; then
-#    STOW_FOLDERS="bin,i3,nvim,personal,tmux"
-    STOW_FOLDERS="nvim, i3"
+    STOW_FOLDERS="bin,i3,nd,nvim,personal,tmux"
 fi
 
 if [[ -z $DOTFILES ]]; then

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+# install from apt: blueman, i3, brightnessctl, dconf-editor, fzf, gnome-tweaks, gtk-chtheme, mpv, openssh-client/server?, pavucontrol, redshift, rofi, firefox, tmux, vim, neovim?, xclip
+
+# install other stuff: starship, appimagelauncher, fonts, themes, icons, settings, stow 3.4.0, golang?
+
+# list of stuff I might want: glow, dunst, neofetch, net-tools, ranger, syncthing, thunderbird, tlp, unzip, vlc

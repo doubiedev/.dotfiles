@@ -1,0 +1,7 @@
+[user]
+	email = thedoubiedev@gmail.com
+	name = doubiedev
+[init]
+	defaultBranch = master
+[credential]
+	helper = libsecret
