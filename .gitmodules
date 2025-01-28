@@ -1,3 +1,0 @@
-[submodule "personal"]
-	path = submodules/personal
-	url = git@github.com:doubiedev/.dotfiles-personal.git
