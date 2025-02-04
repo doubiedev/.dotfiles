@@ -29,7 +29,7 @@ vim.g.maplocalleader = "\\"
 -- REMAPS
 -- ============================================================================
 vim.g.mapleader = " "
--- vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open netrw" })
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open netrw" })
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
@@ -291,13 +291,13 @@ require("lazy").setup({
                 "rcarriga/nvim-notify",
             },
         },
-        {
-            "stevearc/oil.nvim",
-            dependencies = {
-                "echasnovski/mini.icons"
-            },
-            lazy = false,
-        }
+        -- {
+        --     "stevearc/oil.nvim",
+        --     dependencies = {
+        --         "echasnovski/mini.icons"
+        --     },
+        --     lazy = false,
+        -- }
     },
 
     -- Configure any other settings here. See the documentation for more details.
@@ -324,7 +324,7 @@ require("plugins.ts-autotag").setup()
 require("plugins.render-markdown").setup()
 require("plugins.obsidian").setup()
 require("plugins.pomo").setup()
-require("plugins.oil").setup()
+-- require("plugins.oil").setup()
 
 require("mini.icons").setup()
 require("mini.surround").setup()
