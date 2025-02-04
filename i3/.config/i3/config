@@ -185,6 +185,10 @@ workspace_auto_back_and_forth yes
 # ------------------------------------------
 # bindsym [--release] [<Group>+][<Modifiers>+]<keysym> command
 
+# Multi-monitor window switching
+bindsym $mod+semicolon focus output next
+bindsym $mod+Shift+semicolon move workspace to output next
+
 # Suspend
 bindsym $mod+Shift+period exec systemctl suspend
 
@@ -192,7 +196,7 @@ bindsym $mod+Shift+period exec systemctl suspend
 bindsym $mod+d exec --no-startup-id rofi -show drun
 bindsym $mod+Shift+d exec --no-startup-id rofi -show run
 # want to make a command which runs rofi -show window as long as alt is held
-bindsym $mod+Tab exec --no-startup-id rofi -show window
+# bindsym $mod+Tab exec --no-startup-id rofi -show window
 bindsym $mod+Shift+s exec --no-startup-id rofi -show ssh
 
 
@@ -280,14 +284,6 @@ exec_always --no-startup-id env XDG_CURRENT_DESKTOP=GNOME
 # exec --no-startup-id /usr/libexec/gnome-settings-daemon-localeexec
 # Fix a bug in gnome-settings-daemon: http://feeding.cloud.geek.nz/posts/creating-a-modern-tiling-desktop-environment-using-i3/
 # exec --no-startup-id dconf write /org/gnome/settings-daemon/plugins/cursor/active false
-
-
-# Xrandr (Multiple Monitors)
-
-# bindsym $mod+p exec xrandr --output eDP-1 --mode 1920x1080
-# bindsym $mod+Shift+p exec xrandr --output eDP-1 --auto --pos 0x0 --output HDMI-2 --auto --right-of eDP-1
-bindsym $mod+x focus output right
-bindsym $mod+Shift+x move workspace to output next
 
 # change focus between monitors
 # bindsym $mod+comma focus output left
