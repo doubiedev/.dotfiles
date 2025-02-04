@@ -13,6 +13,10 @@ return {
         vim.keymap.set("n", "<C-j>", function() harpoon:list():select(2) end, { desc = "Select 2nd file in Harpoon list" })
         vim.keymap.set("n", "<C-k>", function() harpoon:list():select(3) end, { desc = "Select 3rd file in Harpoon list" })
         vim.keymap.set("n", "<C-l>", function() harpoon:list():select(4) end, { desc = "Select 4th file in Harpoon list" })
+        vim.keymap.set("n", "<C-M-h>", function() harpoon:list():select(5) end, { desc = "Select 5th file in Harpoon list" })
+        vim.keymap.set("n", "<C-M-j>", function() harpoon:list():select(6) end, { desc = "Select 6th file in Harpoon list" })
+        vim.keymap.set("n", "<C-M-k>", function() harpoon:list():select(7) end, { desc = "Select 7th file in Harpoon list" })
+        vim.keymap.set("n", "<C-M-l>", function() harpoon:list():select(8) end, { desc = "Select 8th file in Harpoon list" })
 
         -- Toggle previous & next buffers stored within Harpoon list
         vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end, { desc = "Toggle previous buffer in Harpoon list" })
