@@ -176,7 +176,12 @@ require("lazy").setup({
         {
             'nvim-treesitter/nvim-treesitter',
             build = ':TSUpdate',
-            lazy = true
+            lazy = true,
+        },
+        {
+            'nvim-treesitter/nvim-treesitter-context',
+            lazy = true,
+            dependencies = { 'nvim-treesitter/nvim-treesitter' },
         },
         {
             'ThePrimeagen/harpoon',
