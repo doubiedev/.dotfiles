@@ -82,9 +82,11 @@ bindsym $mod+g split h
 bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
-# bindsym $mod+x fullscreen toggle
+bindsym $mod+x fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
+default_border pixel
+hide_edge_borders smart
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
@@ -178,7 +180,7 @@ bindsym $mod+r mode "resize"
 #        status_command i3status
 # }
 
-workspace_auto_back_and_forth yes
+# workspace_auto_back_and_forth yes
 
 # ------------------------------------------
 # CUSTOM KEYS
@@ -249,6 +251,9 @@ bindsym $mod+m exec vlc
 
 # Mpv work playlist
 bindsym $mod+Shift+m exec --no-startup-id "mpv ~/Music/ambient-mixes/playlist.m3u"
+
+# Swapping windows
+bindsym $mod+Tab workspace back_and_forth
 
 # ----------------------------------------------------------------------------------------------------------------
 # Add this to your i3 config to take a screenshot (selection) and save it to the clipboard just by pressing PrtSc!
