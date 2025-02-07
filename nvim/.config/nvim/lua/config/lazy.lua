@@ -53,6 +53,7 @@ vim.keymap.set("n", "<leader>d", "\"_d", { desc = "Delete without yanking" })
 vim.keymap.set("v", "<leader>d", "\"_d", { desc = "Delete selection without yanking" })
 
 vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
+vim.keymap.set("i", "<C-[>", "<Esc>", { desc = "Exit insert mode" })
 
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable Q key" })
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux new tmux-sessionizer<CR>", { desc = "Open a new tmux session" })
@@ -70,6 +71,7 @@ vim.keymap.set("n", "<leader>l", "<C-w>l", { desc = "Move to right split" })
 
 vim.keymap.set("n", "<leader>s", ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
     { desc = "Search and replace for word under cursor" })
+vim.keymap.set("v", "<leader>s", ":s/", { desc = "Search and replace selected text" })
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { desc = "Make current file executable" })
 
 vim.keymap.set("n", "<leader>ww", "<cmd>set wrap!<CR>", { desc = "Toggle line wrapping" })
@@ -321,7 +323,13 @@ require("lazy").setup({
             keys = {
                 { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" }
             }
-        }
+        },
+        {
+            "nvzone/typr",
+            dependencies = "nvzone/volt",
+            opts = {},
+            cmd = { "Typr", "TyprStats" },
+        },
     },
 
     -- Configure any other settings here. See the documentation for more details.
