@@ -267,37 +267,37 @@ require("lazy").setup({
         {
             "windwp/nvim-ts-autotag",
         },
-        {
-            "epwalsh/obsidian.nvim",
-            version = "*",
-            lazy = true,
-            event = {
-                -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
-                -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/*.md"
-                -- refer to `:h file-pattern` for more examples
-                "BufReadPre " .. vim.fn.expand "~" .. "personal/notes/*.md",
-                "BufNewFile " .. vim.fn.expand "~" .. "personal/notes/*.md",
-            },
-            dependencies = {
-                "nvim-lua/plenary.nvim",
-                "hrsh7th/nvim-cmp",
-                "nvim-telescope/telescope.nvim",
-                "nvim-treesitter/nvim-treesitter",
-            },
-        },
+        -- {
+        --     "epwalsh/obsidian.nvim",
+        --     version = "*",
+        --     lazy = true,
+        --     event = {
+        --         -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
+        --         -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/*.md"
+        --         -- refer to `:h file-pattern` for more examples
+        --         "BufReadPre " .. vim.fn.expand "~" .. "personal/notes/*.md",
+        --         "BufNewFile " .. vim.fn.expand "~" .. "personal/notes/*.md",
+        --     },
+        --     dependencies = {
+        --         "nvim-lua/plenary.nvim",
+        --         "hrsh7th/nvim-cmp",
+        --         "nvim-telescope/telescope.nvim",
+        --         "nvim-treesitter/nvim-treesitter",
+        --     },
+        -- },
         -- {
         --     "rmagatti/auto-session",
         --     lazy = false,
         -- },
-        {
-            "epwalsh/pomo.nvim",
-            version = "*",
-            lazy = true,
-            cmd = { "TimerStart", "TimerRepeat", "TimerSession" },
-            dependencies = {
-                "rcarriga/nvim-notify",
-            },
-        },
+        -- {
+        --     "epwalsh/pomo.nvim",
+        --     version = "*",
+        --     lazy = true,
+        --     cmd = { "TimerStart", "TimerRepeat", "TimerSession" },
+        --     dependencies = {
+        --         "rcarriga/nvim-notify",
+        --     },
+        -- },
         -- {
         --     "stevearc/oil.nvim",
         --     dependencies = {
@@ -354,7 +354,7 @@ require("plugins.dooing").setup()
 require("plugins.todo-comments").setup()
 require("plugins.ts-autotag").setup()
 require("plugins.render-markdown").setup()
-require("plugins.obsidian").setup()
+-- require("plugins.obsidian").setup()
 require("plugins.pomo").setup()
 -- require("plugins.oil").setup()
 
