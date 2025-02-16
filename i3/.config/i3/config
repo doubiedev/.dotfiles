@@ -247,9 +247,10 @@ mode "$mode_redshift" {
 }
 
 # Vlc
-bindsym $mod+m exec vlc
+bindsym $mod+Shift+v exec vlc
 
 # Mpv work playlist
+bindsym $mod+m exec --no-startup-id "mpv ~/Sync/music/playlists/y370/Synthwave.m3u --shuffle"
 bindsym $mod+Shift+m exec --no-startup-id "mpv ~/Music/ambient-mixes/playlist.m3u"
 
 # Swapping windows
