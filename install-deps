@@ -1,8 +1,26 @@
 #!/bin/bash
 
+# STOW v2.4.0
+sudo su
+cd ~
+wget https://github.com/aspiers/stow/archive/refs/tags/v2.4.0.tar.gz
+tar -xvzf ./v2.4.0.tar.gz
+cd ./stow-2.4.0
+apt install autoreconf make texinfo texlive -y
+autoreconf -iv
+cpan
+# yes
+# sudo
+# install Test::Output
+# q
+touch ChangeLog
+./configure && make install
+# eval `perl -V:siteprefix`
+# ./configure --prefix=$siteprefix && make
+rm -rf ~/v2.4.0.tar.gz
+rm -rf ~/stow-2.4.0
 
+# To Get:
 # install from apt: blueman, i3, brightnessctl, dconf-editor, fzf, gnome-tweaks, gtk-chtheme, mpv, openssh-client/server?, pavucontrol, redshift, rofi, firefox, tmux, vim, neovim?, xclip
-
 # install other stuff: starship, appimagelauncher, fonts, themes, icons, settings, stow 3.4.0, golang?
-
 # list of stuff I might want: glow, dunst, neofetch, net-tools, ranger, syncthing, thunderbird, tlp, unzip, vlc
