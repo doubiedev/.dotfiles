@@ -56,7 +56,7 @@ vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("i", "<C-[>", "<Esc>", { desc = "Exit insert mode" })
 
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable Q key" })
-vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux new tmux-sessionizer<CR>", { desc = "Open a new tmux session" })
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>", { desc = "Open a new tmux session" })
 vim.keymap.set("n", "<leader>f", function()
     vim.lsp.buf.format()
 end, { desc = "Format current buffer" })
