@@ -76,6 +76,7 @@ return {
                 'eslint',
                 'lua_ls',
                 'gopls',
+                'marksman',
             },
             handlers = {
                 function(server_name)
