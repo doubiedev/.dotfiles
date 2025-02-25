@@ -5,3 +5,4 @@ Requires:
 - ripgrep
 - gcc
 - (some others not listed - need to include)
+- [ghostty](https://github.com/mkasberg/ghostty-ubuntu)
