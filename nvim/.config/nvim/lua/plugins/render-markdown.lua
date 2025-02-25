@@ -37,9 +37,9 @@ return {
                 --   'highlight':       Highlight for the 'rendered' icon
                 --   'scope_highlight': Highlight for item associated with custom checkbox
                 custom = {
-                    todo = { raw = '[-]', rendered = '󰥔 ', highlight = 'RenderMarkdownTodo', scope_highlight = nil },
-                    cancelled = { raw = '[c]', rendered = '󰜺 ', highlight = 'RenderMarkdownCancelled', scope_highlight = nil },
-                    postponed = { raw = '[p]', rendered = ' ', highlight = 'RenderMarkdownPostponed', scope_highlight = nil },
+                    todo = { raw = '[/]', rendered = '󰥔 ', highlight = 'RenderMarkdownTodo', scope_highlight = nil },
+                    cancelled = { raw = '[-]', rendered = '󰜺 ', highlight = 'RenderMarkdownCancelled', scope_highlight = nil },
+                    postponed = { raw = '[>]', rendered = ' ', highlight = 'RenderMarkdownPostponed', scope_highlight = nil },
                 },
             },
         })

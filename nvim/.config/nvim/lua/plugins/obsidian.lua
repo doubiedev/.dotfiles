@@ -6,46 +6,37 @@ return {
         vim.keymap.set("n", "<C-CR>", ":ObsidianFollowLink<CR>", { desc = "Follow link under cursor" })
         vim.keymap.set("n", "<leader>olb", ":ObsidianBacklinks<CR>", { desc = "List backlinks to current buffer" })
         vim.keymap.set("n", "<leader>olt", ":ObsidianTags<CR>", { desc = "List occurrences of given tags" })
-        vim.keymap.set("n", "<leader>od", ":ObsidianToday<CR>", { desc = "Open today's daily note" })
+        vim.keymap.set("n", "<leader>odd", ":ObsidianToday<CR>", { desc = "Open today's daily note" })
         vim.keymap.set("n", "<leader>odp", ":ObsidianToday -1<CR>", { desc = "Open yesterday's daily note" })
         vim.keymap.set("n", "<leader>odn", ":ObsidianToday 1<CR>", { desc = "Open tomorrow's daily note" })
-        vim.keymap.set("n", "<leader>old", ":ObsidianDailies<CR>", { desc = "List daily notes" })
+        vim.keymap.set("n", "<leader>odl", ":ObsidianDailies<CR>", { desc = "List daily notes" })
         vim.keymap.set("n", "<leader>oi", ":ObsidianTemplate<CR>", { desc = "Insert a template" })
         vim.keymap.set("n", "<leader>of", ":ObsidianSearch<CR>", { desc = "Search for notes using ripgrep" })
-        vim.keymap.set("v", "<leader>ok", ":ObsidianLink<CR>", { desc = "Link selected text to a note" })
-        vim.keymap.set("v", "<leader>okn", ":ObsidianLinkNew<CR>",
+        vim.keymap.set("v", "<leader>oln", ":ObsidianLink<CR>", { desc = "Link selected text to a note" })
+        vim.keymap.set("v", "<leader>olc", ":ObsidianLinkNew<CR>",
             { desc = "Create and link a new note to selected text" })
         vim.keymap.set("n", "<leader>oll", ":ObsidianLinks<CR>", { desc = "Collect all links in the current buffer" })
         vim.keymap.set("v", "<leader>oe", ":ObsidianExtractNote<CR>", { desc = "Extract selected text to a new note" })
         vim.keymap.set("n", "<leader>ow", ":ObsidianWorkspace<CR>", { desc = "Switch workspace" })
         vim.keymap.set("n", "<leader>ov", ":ObsidianPasteImg<CR>", { desc = "Paste an image from clipboard" })
         vim.keymap.set("n", "<leader>or", ":ObsidianRename<CR>", { desc = "Rename current note and update backlinks" })
-        vim.keymap.set("n", "<leader>oc", ":ObsidianToggleCheckbox<CR>", { desc = "Toggle checkbox state" })
+        vim.keymap.set("n", "<leader>och", ":ObsidianToggleCheckbox<CR>", { desc = "Toggle checkbox state" })
         vim.keymap.set("n", "<leader>ont", ":ObsidianNewFromTemplate<CR>", { desc = "Create a new note from a template" })
-        vim.keymap.set("n", "<leader>ot", ":ObsidianTOC<CR>", { desc = "Load table of contents of current note" })
+        vim.keymap.set("n", "<leader>oc", ":ObsidianTOC<CR>", { desc = "Load table of contents of current note" })
 
         require("obsidian").setup({
             workspaces = {
                 {
                     name = "personal",
                     path = "~/personal/notes",
-                    -- Optional, override certain settings.
-                    -- overrides = {
-                    --     notes_subdir = "0-Inbox",
-                    -- },
                 },
             },
 
-            -- Optional, if you keep notes in a specific subdirectory of your vault.
-            notes_subdir = "0-Inbox",
-
-            -- Optional, set the log level for obsidian.nvim. This is an integer corresponding to one of the log
-            -- levels defined by "vim.log.levels.*".
             log_level = vim.log.levels.INFO,
 
             daily_notes = {
                 -- Optional, if you keep daily notes in a separate directory.
-                folder = "2-Areas/journal/daily",
+                folder = "0-Journal/daily",
                 -- Optional, if you want to change the date format for the ID of daily notes.
                 -- date_format = "%Y-%m-%d",
                 -- Optional, if you want to change the date format of the default alias of daily notes.
@@ -53,7 +44,7 @@ return {
                 -- Optional, default tags to add to each new daily note created.
                 -- default_tags = { "daily-notes" },
                 -- Optional, if you want to automatically insert a template from your template directory like 'daily.md'
-                template = "3-Resources/templates/daily-note-template.md"
+                template = "5-Other/templates/daily-template.md",
             },
 
             -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
@@ -143,7 +134,7 @@ return {
 
             -- Optional, boolean or a function that takes a filename and returns a boolean.
             -- `true` indicates that you don't want obsidian.nvim to manage frontmatter.
-            disable_frontmatter = false,
+            disable_frontmatter = true,
 
             -- Optional, alternatively you can customize the frontmatter data.
             ---@return table
@@ -168,7 +159,7 @@ return {
 
             -- Optional, for templates (see below).
             templates = {
-                folder = "3-Resources/templates",
+                folder = "5-Other/templates",
                 date_format = "%Y-%m-%d",
                 time_format = "%H:%M",
                 -- A map for custom variables, the key should be the variable and the value a function
@@ -262,7 +253,7 @@ return {
             -- Optional, configure additional syntax highlighting / extmarks.
             -- This requires you have `conceallevel` set to 1 or 2. See `:help conceallevel` for more details.
             ui = {
-                enable = true,          -- set to false to disable all additional syntax features
+                enable = false,          -- set to false to disable all additional syntax features
                 update_debounce = 200,  -- update delay after a text change (in milliseconds)
                 max_file_length = 5000, -- disable UI features for files with more than this many lines
                 -- Define how various check-boxes are displayed
@@ -302,7 +293,7 @@ return {
                 -- The default folder to place images in via `:ObsidianPasteImg`.
                 -- If this is a relative path it will be interpreted as relative to the vault root.
                 -- You can always override this per image by passing a full path to the command instead of just a filename.
-                img_folder = "3-Resources/assets/imgs",
+                img_folder = "5-Other/attachments/imgs",
 
                 -- Optional, customize the default name or prefix when pasting images via `:ObsidianPasteImg`.
                 ---@return string
