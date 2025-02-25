@@ -49,3 +49,15 @@ mouse-hide-while-typing = true
 gtk-titlebar = false
 window-save-state = never
 window-decoration = none
+
+# KEYBINDS
+keybind = alt+zero=unbind
+keybind = alt+one=unbind
+keybind = alt+two=unbind
+keybind = alt+three=unbind
+keybind = alt+four=unbind
+keybind = alt+five=unbind
+keybind = alt+six=unbind
+keybind = alt+seven=unbind
+keybind = alt+eight=unbind
+keybind = alt+nine=unbind
