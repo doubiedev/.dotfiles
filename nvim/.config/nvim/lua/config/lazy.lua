@@ -327,11 +327,6 @@ require("lazy").setup({
             opts = {},
             cmd = { "Typr", "TyprStats" },
         },
-        {
-            "akinsho/toggleterm.nvim",
-            version = "*",
-            opts = {},
-        },
     },
 
     -- Configure any other settings here. See the documentation for more details.
