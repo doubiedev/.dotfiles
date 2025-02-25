@@ -61,3 +61,6 @@ keybind = alt+six=unbind
 keybind = alt+seven=unbind
 keybind = alt+eight=unbind
 keybind = alt+nine=unbind
+
+keybind = ctrl+shift+v=unbind
+keybind = ctrl+v=paste_from_clipboard
