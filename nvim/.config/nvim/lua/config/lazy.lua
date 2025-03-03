@@ -329,6 +329,10 @@ require("lazy").setup({
             opts = {},
             cmd = { "Typr", "TyprStats" },
         },
+        {
+            "habamax/vim-godot",
+            event = 'VimEnter',
+        },
     },
 
     -- Configure any other settings here. See the documentation for more details.

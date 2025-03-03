@@ -2,7 +2,7 @@ return {
     setup = function()
         require 'nvim-treesitter.configs'.setup {
             -- A list of parser names, or "all" (the listed parsers MUST always be installed)
-            ensure_installed = { "lua", "go", "vim", "vimdoc", "query", "markdown", "markdown_inline", "javascript", "typescript", },
+            ensure_installed = { "gdscript", "godot_resource", "gdshader", "lua", "go", "vim", "vimdoc", "query", "markdown", "markdown_inline", "javascript", "typescript", },
 
             -- Install parsers synchronously (only applied to `ensure_installed`)
             sync_install = false,
@@ -22,6 +22,10 @@ return {
                 -- Using this option may slow down your editor, and you may see some duplicate highlights.
                 -- Instead of true it can also be a list of languages
                 additional_vim_regex_highlighting = false,
+            },
+
+            indent = {
+                disable = {"gdscript", "godot_resource", "gdshader"},
             },
 
             modules = {},

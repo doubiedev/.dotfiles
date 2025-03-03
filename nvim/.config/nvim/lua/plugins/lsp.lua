@@ -36,6 +36,8 @@ return {
             end,
         })
 
+        require('lspconfig').gdscript.setup(lspconfig_defaults.capabilities)
+
         local cmp = require('cmp')
         require('luasnip.loaders.from_vscode').lazy_load()
 
