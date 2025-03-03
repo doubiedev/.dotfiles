@@ -37,6 +37,7 @@ return {
         })
 
         local cmp = require('cmp')
+        require('luasnip.loaders.from_vscode').lazy_load()
 
         cmp.setup({
             sources = {
@@ -55,6 +56,48 @@ return {
                 -- ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
                 -- ['<C-y>'] = cmp.mapping.confirm({ select = true }),
                 -- ['<C-Space>'] = cmp.mapping.complete(),
+                -- confirm completion item
+                ['<CR>'] = cmp.mapping.confirm({ select = false }),
+
+                -- scroll documentation window
+                ['<C-f>'] = cmp.mapping.scroll_docs(5),
+                ['<C-u>'] = cmp.mapping.scroll_docs(-5),
+
+                -- toggle completion menu
+                ['<C-e>'] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                        cmp.abort()
+                    else
+                        cmp.complete()
+                    end
+                end),
+
+                -- tab complete
+                ['<Tab>'] = cmp.mapping(function(fallback)
+                    local col = vim.fn.col('.') - 1
+
+                    if cmp.visible() then
+                        cmp.select_next_item({ behavior = 'select' })
+                    elseif col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
+                        fallback()
+                    else
+                        cmp.complete()
+                    end
+                end, { 'i', 's' }),
+
+                -- go to previous item
+                ['<S-Tab>'] = cmp.mapping.select_prev_item({ behavior = 'select' }),
+
+                -- navigate to next snippet placeholder
+                ['<C-d>'] = cmp.mapping(function(fallback)
+                    local luasnip = require('luasnip')
+
+                    if luasnip.jumpable(1) then
+                        luasnip.jump(1)
+                    else
+                        fallback()
+                    end
+                end, { 'i', 's' }),
             }),
         })
 
