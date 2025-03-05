@@ -261,7 +261,7 @@ bindsym $mod+Tab workspace back_and_forth
 
 # screenshot (saves to clipboard and a file in ~/screenshots)
 # key: PrtSc
-bindsym Print exec NOW=$(date +%d-%b-%Y_%H-%M-%S) && maim --format png --select > ~/Pictures/Screenshots/screenshot_$NOW.png && xclip -selection clip -t image/png ~/screenshots/screenshot_$NOW.png
+bindsym Print exec NOW=$(date +%Y-%m-%d_%H-%M-%S) && maim --format png --select > ~/Pictures/Screenshots/screenshot_$NOW.png && xclip -selection clip -t image/png ~/screenshots/screenshot_$NOW.png
 
 # ------------------------------------------
 # LAUNCH ON LOGIN
