@@ -1,11 +1,11 @@
 return {
     setup = function()
-        vim.keymap.set("n", "<leader>pv", ":Oil<CR>", { desc = "Open Oil in current directory" })
+        vim.keymap.set("n", "<leader>pV", ":Oil<CR>", { desc = "Open Oil in current directory" })
 
         require("oil").setup({
             -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
             -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.
-            default_file_explorer = true,
+            default_file_explorer = false,
             -- Id is automatically added at the beginning, and name at the end
             -- See :help oil-columns
             columns = {

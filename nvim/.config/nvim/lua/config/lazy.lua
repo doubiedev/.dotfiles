@@ -297,13 +297,13 @@ require("lazy").setup({
         --         "rcarriga/nvim-notify",
         --     },
         -- },
-        -- {
-        --     "stevearc/oil.nvim",
-        --     dependencies = {
-        --         "echasnovski/mini.icons"
-        --     },
-        --     lazy = false,
-        -- }
+        {
+            "stevearc/oil.nvim",
+            dependencies = {
+                "echasnovski/mini.icons"
+            },
+            lazy = false,
+        },
         {
             "kdheepak/lazygit.nvim",
             lazy = true,
@@ -358,8 +358,7 @@ require("plugins.todo-comments").setup()
 require("plugins.ts-autotag").setup()
 require("plugins.render-markdown").setup()
 require("plugins.obsidian").setup()
--- require("plugins.pomo").setup()
--- require("plugins.oil").setup()
+require("plugins.oil").setup()
 
 require("mini.icons").setup()
 require("mini.surround").setup()
