@@ -25,6 +25,7 @@ return {
             },
 
             indent = {
+                enable = true,
                 disable = {"gdscript", "godot_resource", "gdshader"},
             },
 
