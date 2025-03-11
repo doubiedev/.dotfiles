@@ -22,13 +22,12 @@ vim.opt.rtp:prepend(lazypath)
 -- loading lazy.nvim so that mappings are correct.
 -- This is also a good place to setup other settings (vim.opt)
 
--- vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 -- ============================================================================
 -- REMAPS
 -- ============================================================================
-vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open netrw" })
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
@@ -156,12 +155,6 @@ vim.g.netrw_winsize = 25
 -- Setup lazy.nvim
 require("lazy").setup({
     spec = {
-        'ThePrimeagen/vim-be-good',
-        'RishabhRD/popfix',
-        'RishabhRD/nvim-cheat.sh',
-        'folke/zen-mode.nvim',
-        'mbbill/undotree',
-        'tpope/vim-fugitive',
         {
             'nvim-telescope/telescope.nvim',
             version = '0.1.8',
@@ -258,9 +251,6 @@ require("lazy").setup({
             version = '*',
         },
         {
-            "atiladefreitas/dooing",
-        },
-        {
             "folke/todo-comments.nvim",
             dependencies = { "nvim-lua/plenary.nvim" },
             opts = {}
@@ -287,15 +277,6 @@ require("lazy").setup({
             "rmagatti/auto-session",
             lazy = false,
         },
-        -- {
-        --     "epwalsh/pomo.nvim",
-        --     version = "*",
-        --     lazy = true,
-        --     cmd = { "TimerStart", "TimerRepeat", "TimerSession" },
-        --     dependencies = {
-        --         "rcarriga/nvim-notify",
-        --     },
-        -- },
         {
             "stevearc/oil.nvim",
             dependencies = {
@@ -332,6 +313,19 @@ require("lazy").setup({
             "habamax/vim-godot",
             event = 'VimEnter',
         },
+        {
+            "nvim-neorg/neorg",
+            lazy = false,
+            version = "9.2.0", -- Pin Neorg to the latest stable release
+            config = true,
+        },
+        'ThePrimeagen/vim-be-good',
+        'RishabhRD/popfix',
+        'RishabhRD/nvim-cheat.sh',
+        'folke/zen-mode.nvim',
+        'mbbill/undotree',
+        'tpope/vim-fugitive',
+        "sindrets/diffview.nvim",
     },
 
     -- Configure any other settings here. See the documentation for more details.
@@ -352,12 +346,12 @@ require("plugins.zenmode").setup()
 require("plugins.lsp").setup()
 require("plugins.curl").setup()
 require("plugins.which-key").setup()
-require("plugins.dooing").setup()
 require("plugins.todo-comments").setup()
 require("plugins.ts-autotag").setup()
 require("plugins.render-markdown").setup()
 require("plugins.obsidian").setup()
 require("plugins.oil").setup()
+require("plugins.neorg").setup()
 
 require("mini.icons").setup()
 require("mini.surround").setup()

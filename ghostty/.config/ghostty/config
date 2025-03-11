@@ -42,7 +42,7 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-font-family = FiraCode Nerd Font
+font-family = Iosevka NFM
 theme = rose-pine
 cursor-style = block
 mouse-hide-while-typing = true
