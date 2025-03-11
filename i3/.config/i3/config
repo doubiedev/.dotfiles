@@ -180,12 +180,15 @@ bindsym $mod+r mode "resize"
 #        status_command i3status
 # }
 
-# workspace_auto_back_and_forth yes
+workspace_auto_back_and_forth yes
 
 # ------------------------------------------
 # CUSTOM KEYS
 # ------------------------------------------
 # bindsym [--release] [<Group>+][<Modifiers>+]<keysym> command
+
+# Swapping windows
+bindsym $mod+Tab workspace back_and_forth
 
 # Multi-monitor window switching
 bindsym $mod+semicolon focus output next
@@ -246,9 +249,6 @@ bindsym $mod+Shift+v exec vlc
 # Mpv work playlist
 bindsym $mod+m exec --no-startup-id "mpv ~/Sync/music/playlists/y370/Synthwave.m3u --shuffle"
 bindsym $mod+Shift+m exec --no-startup-id "mpv ~/Music/ambient-mixes/playlist.m3u"
-
-# Swapping windows
-bindsym $mod+Tab workspace back_and_forth
 
 # ----------------------------------------------------------------------------------------------------------------
 # Add this to your i3 config to take a screenshot (selection) and save it to the clipboard just by pressing PrtSc!
