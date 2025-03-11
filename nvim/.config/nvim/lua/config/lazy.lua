@@ -65,8 +65,8 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Go to previous quickf
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Go to next location list item" })
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Go to previous location list item" })
 
-vim.keymap.set("n", "<leader>h", "<C-w>h", { desc = "Move to left split" })
-vim.keymap.set("n", "<leader>l", "<C-w>l", { desc = "Move to right split" })
+-- vim.keymap.set("n", "<leader>h", "<C-w>h", { desc = "Move to left split" })
+-- vim.keymap.set("n", "<leader>l", "<C-w>l", { desc = "Move to right split" })
 
 vim.keymap.set("n", "<leader>s", ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
     { desc = "Search and replace for word under cursor" })
@@ -108,7 +108,7 @@ vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
 
-vim.opt.conceallevel = 1
+-- vim.opt.conceallevel = 1
 
 vim.g.mapleader = " "
 
@@ -196,23 +196,23 @@ require("lazy").setup({
                 'rafamadriz/friendly-snippets',
             }
         },
-        {
-            'MeanderingProgrammer/render-markdown.nvim',
-            dependencies = {
-                'nvim-treesitter/nvim-treesitter',
-                'echasnovski/mini.nvim', -- if you use the mini.nvim suite
-            },
-        },
-        {
-            "iamcco/markdown-preview.nvim",
-            cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-            ft = { 'markdown' },
-            -- build = function()
-            --     vim.cmd [[Lazy load markdown-preview.nvim]]
-            --     vim.fn['mkdp#util#install']()
-            -- end,
-            build = ":call mkdp#util#install()",
-        },
+        -- {
+        --     'MeanderingProgrammer/render-markdown.nvim',
+        --     dependencies = {
+        --         'nvim-treesitter/nvim-treesitter',
+        --         'echasnovski/mini.nvim', -- if you use the mini.nvim suite
+        --     },
+        -- },
+        -- {
+        --     "iamcco/markdown-preview.nvim",
+        --     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+        --     ft = { 'markdown' },
+        --     -- build = function()
+        --     --     vim.cmd [[Lazy load markdown-preview.nvim]]
+        --     --     vim.fn['mkdp#util#install']()
+        --     -- end,
+        --     build = ":call mkdp#util#install()",
+        -- },
         {
             "folke/lazydev.nvim",
             ft = "lua", -- only load on lua files
@@ -317,7 +317,31 @@ require("lazy").setup({
             "nvim-neorg/neorg",
             lazy = false,
             version = "9.2.0", -- Pin Neorg to the latest stable release
-            config = true,
+            config = function()
+                require("neorg").setup({
+                    load = {
+                        ["core.defaults"] = {},
+                        ["core.concealer"] = {
+                            config = {
+                                icon_preset = "varied",
+                            }
+                        },
+                        ["core.autocommands"] = {},
+                        ["core.integrations.treesitter"] = {},
+                        ["core.dirman"] = {
+                            config = {
+                                workspaces = {
+                                    notes = "~/personal/neorg",
+                                },
+                                default_workspace = "notes",
+                            },
+                        },
+                    },
+                })
+
+                vim.wo.foldlevel = 99
+                vim.wo.conceallevel = 2
+            end
         },
         'ThePrimeagen/vim-be-good',
         'RishabhRD/popfix',
@@ -348,10 +372,9 @@ require("plugins.curl").setup()
 require("plugins.which-key").setup()
 require("plugins.todo-comments").setup()
 require("plugins.ts-autotag").setup()
-require("plugins.render-markdown").setup()
+-- require("plugins.render-markdown").setup()
 require("plugins.obsidian").setup()
 require("plugins.oil").setup()
-require("plugins.neorg").setup()
 
 require("mini.icons").setup()
 require("mini.surround").setup()
