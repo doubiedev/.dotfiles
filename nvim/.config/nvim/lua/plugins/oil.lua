@@ -1,11 +1,15 @@
 return {
     setup = function()
-        vim.keymap.set("n", "<leader>pV", ":Oil<CR>", { desc = "Open Oil in current directory" })
+        vim.api.nvim_create_user_command("Explore", "Oil <args>", { nargs = "?", complete = "dir" })
+        vim.api.nvim_create_user_command("E", "Explore <args>", { nargs = "?", complete = "dir" })
+        vim.api.nvim_create_user_command("Sexplore", "belowright split | Oil <args>", { nargs = "?", complete = "dir" })
+        vim.api.nvim_create_user_command("Vexplore", "rightbelow vsplit | Oil <args>", { nargs = "?", complete = "dir" })
+        vim.api.nvim_create_user_command("Texplore", "tabedit % | Oil <args>", { nargs = "?", complete = "dir" })
 
         require("oil").setup({
             -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
             -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.
-            default_file_explorer = false,
+            default_file_explorer = true,
             -- Id is automatically added at the beginning, and name at the end
             -- See :help oil-columns
             columns = {
@@ -64,12 +68,14 @@ return {
             keymaps = {
                 ["g?"] = { "actions.show_help", mode = "n" },
                 ["<CR>"] = "actions.select",
-                ["<C-S>"] = { "actions.select", opts = { vertical = true } },
-                ["<C-s>"] = { "actions.select", opts = { horizontal = true } },
+                ["<C-s>"] = { "actions.select", opts = { vertical = true } },
+                ["<C-h>"] = false,
+                ["<C-M-h>"] = { "actions.select", opts = { horizontal = true } },
                 ["<C-t>"] = { "actions.select", opts = { tab = true } },
                 ["<C-p>"] = "actions.preview",
                 ["<C-c>"] = { "actions.close", mode = "n" },
-                ["<C-R>"] = "actions.refresh",
+                ["<C-l>"] = false,
+                ["<C-M-l"] = "actions.refresh",
                 ["-"] = { "actions.parent", mode = "n" },
                 ["_"] = { "actions.open_cwd", mode = "n" },
                 ["`"] = { "actions.cd", mode = "n" },
