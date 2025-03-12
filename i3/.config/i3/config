@@ -206,7 +206,8 @@ bindsym $mod+Shift+s exec --no-startup-id rofi -show ssh
 
 
 # Browser
-bindsym $mod+b exec firefox
+bindsym $mod+b exec brave-browser
+bindsym $mod+Shift+b exec brave-browser --incognito
 
 # File Explorer (Nautilus)
 bindsym $mod+f exec nautilus
@@ -224,21 +225,20 @@ bindsym XF86MonBrightnessDown exec --no-startup-id ~/.local/scripts/brightness-d
 
 
 # Obsidian
-bindsym $mod+o exec ~/Applications/Obsidian-1.6.7_fbe5be623488d0ecebb94f3b174ba197.AppImage
+bindsym $mod+o exec ~/Applications/Obsidian
 
 # Redshift modes
 bindsym $mod+n mode "$mode_redshift"
-set $mode_redshift Set colour temperature: (a)uto, (r)eset, (2)500K, (3)000K, (4)000K, (5)000K
+set $mode_redshift Set colour temperature: (a)uto, (r)eset, (1)900K (2)500K, (3)000K, (4)000K, (5)000K
 set $kill_redshift pkill -9 redshift;
 mode "$mode_redshift" {
     bindsym a exec --no-startup-id "$kill_redshift redshift -P -t 5000:4000", mode "default"
     bindsym r exec --no-startup-id "$kill_redshift redshift -x", mode "default"
+    bindsym 1 exec --no-startup-id "$kill_redshift redshift -P -O 1900", mode "default"
     bindsym 2 exec --no-startup-id "$kill_redshift redshift -P -O 2500", mode "default"
     bindsym 3 exec --no-startup-id "$kill_redshift redshift -P -O 3000", mode "default"
     bindsym 4 exec --no-startup-id "$kill_redshift redshift -P -O 4000", mode "default"
     bindsym 5 exec --no-startup-id "$kill_redshift redshift -P -O 5000", mode "default"
-
-    # exit mode: "Enter" or "Escape"
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
@@ -246,9 +246,17 @@ mode "$mode_redshift" {
 # Vlc
 bindsym $mod+Shift+v exec vlc
 
-# Mpv work playlist
-bindsym $mod+m exec --no-startup-id "mpv ~/Sync/music/playlists/y370/Synthwave.m3u --shuffle"
-bindsym $mod+Shift+m exec --no-startup-id "mpv ~/Music/ambient-mixes/playlist.m3u"
+# Mpv music playlists
+bindsym $mod+m mode "$mode_music"
+set $mode_music Set Music Playlist: (1)Synthwave, (2)Ambient Mixes
+set $kill_music pkill -9 mpv;
+mode "$mode_music" {
+    bindsym 1 exec --no-startup-id "mpv ~/Sync/music/playlists/y370/Synthwave.m3u --shuffle", mode "default"
+    bindsym 2 exec --no-startup-id "mpv ~/Music/ambient-mixes/playlist.m3u", mode "default"
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
 
 # ----------------------------------------------------------------------------------------------------------------
 # Add this to your i3 config to take a screenshot (selection) and save it to the clipboard just by pressing PrtSc!
@@ -267,7 +275,7 @@ bindsym Print exec NOW=$(date +%Y-%m-%d_%H-%M-%S) && maim --format png --select 
 # LAUNCH ON LOGIN
 # ------------------------------------------
 
-exec /usr/bin/pasystray
+# exec /usr/bin/pasystray
 
 # GNOME
 # -----
@@ -312,11 +320,11 @@ exec syncthing -no-browser
 exec --no-startup-id nitrogen --restore
 
 # Todoist
-# exec --no-startup-id /home/nd/Applications/Todoist-linux-9.9.0-x86_64-latest_a08d0c40dd4fcf4430d0299634fad72e.AppImage
+exec --no-startup-id /home/nd/Applications/Todoist
+bindsym $mod+t exec --no-startup-id /home/nd/Applications/Todoist
 
 # Workspaces
 exec i3-msg 'workspace 3, exec gnome-terminal'
-# exec i3-msg 'workspace 4, exec ~/appimages/Obsidian-1.6.7.AppImage'
 
 # ------------------------------------------
 # THEME
