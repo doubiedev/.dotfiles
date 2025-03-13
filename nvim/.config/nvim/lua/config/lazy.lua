@@ -23,7 +23,7 @@ vim.opt.rtp:prepend(lazypath)
 -- This is also a good place to setup other settings (vim.opt)
 
 vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+vim.g.maplocalleader = ","
 
 -- ============================================================================
 -- REMAPS
@@ -351,7 +351,7 @@ require("plugins.which-key").setup()
 require("plugins.todo-comments").setup()
 require("plugins.ts-autotag").setup()
 -- require("plugins.render-markdown").setup()
-require("plugins.obsidian").setup()
+-- require("plugins.obsidian").setup()
 require("plugins.oil").setup()
 
 require("mini.icons").setup()
