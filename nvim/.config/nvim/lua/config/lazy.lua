@@ -196,23 +196,6 @@ require("lazy").setup({
                 'rafamadriz/friendly-snippets',
             }
         },
-        -- {
-        --     'MeanderingProgrammer/render-markdown.nvim',
-        --     dependencies = {
-        --         'nvim-treesitter/nvim-treesitter',
-        --         'echasnovski/mini.nvim', -- if you use the mini.nvim suite
-        --     },
-        -- },
-        -- {
-        --     "iamcco/markdown-preview.nvim",
-        --     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-        --     ft = { 'markdown' },
-        --     -- build = function()
-        --     --     vim.cmd [[Lazy load markdown-preview.nvim]]
-        --     --     vim.fn['mkdp#util#install']()
-        --     -- end,
-        --     build = ":call mkdp#util#install()",
-        -- },
         {
             "folke/lazydev.nvim",
             ft = "lua", -- only load on lua files
@@ -318,31 +301,26 @@ require("lazy").setup({
             lazy = false,
             version = "9.2.0", -- Pin Neorg to the latest stable release
             config = function()
-                require("neorg").setup({
-                    load = {
-                        ["core.defaults"] = {},
-                        ["core.concealer"] = {
-                            config = {
-                                icon_preset = "varied",
-                            }
-                        },
-                        ["core.autocommands"] = {},
-                        ["core.integrations.treesitter"] = {},
-                        ["core.dirman"] = {
-                            config = {
-                                workspaces = {
-                                    notes = "~/personal/neorg",
-                                },
-                                default_workspace = "notes",
-                            },
-                        },
-                    },
-                })
-
-                vim.wo.foldlevel = 99
-                vim.wo.conceallevel = 2
+                require("plugins.neorg").setup()
             end
         },
+        -- {
+        --     'MeanderingProgrammer/render-markdown.nvim',
+        --     dependencies = {
+        --         'nvim-treesitter/nvim-treesitter',
+        --         'echasnovski/mini.nvim', -- if you use the mini.nvim suite
+        --     },
+        -- },
+        -- {
+        --     "iamcco/markdown-preview.nvim",
+        --     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+        --     ft = { 'markdown' },
+        --     -- build = function()
+        --     --     vim.cmd [[Lazy load markdown-preview.nvim]]
+        --     --     vim.fn['mkdp#util#install']()
+        --     -- end,
+        --     build = ":call mkdp#util#install()",
+        -- },
         'ThePrimeagen/vim-be-good',
         'RishabhRD/popfix',
         'RishabhRD/nvim-cheat.sh',
