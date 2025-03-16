@@ -194,6 +194,7 @@ require("lazy").setup({
                 'L3MON4D3/LuaSnip',
                 'saadparwaiz1/cmp_luasnip',
                 'rafamadriz/friendly-snippets',
+                'mlaursen/vim-react-snippets',
             }
         },
         {
@@ -296,14 +297,14 @@ require("lazy").setup({
             "habamax/vim-godot",
             event = 'VimEnter',
         },
-        {
-            "nvim-neorg/neorg",
-            lazy = false,
-            version = "9.2.0", -- Pin Neorg to the latest stable release
-            config = function()
-                require("plugins.neorg").setup()
-            end
-        },
+        -- {
+        --     "nvim-neorg/neorg",
+        --     lazy = false,
+        --     version = "9.2.0", -- Pin Neorg to the latest stable release
+        --     config = function()
+        --         require("plugins.neorg").setup()
+        --     end
+        -- },
         -- {
         --     'MeanderingProgrammer/render-markdown.nvim',
         --     dependencies = {
