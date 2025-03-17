@@ -2,49 +2,46 @@ return {
     setup = function()
         vim.keymap.set("n", "<leader>oo", ":ObsidianOpen<CR>", { desc = "Open a note in Obsidian app" })
         vim.keymap.set("n", "<leader>on", ":ObsidianNew<CR>", { desc = "Create a new note" })
-        vim.keymap.set("n", "<leader>oq", ":ObsidianQuickSwitch<CR>", { desc = "Quickly switch to another note" })
-        vim.keymap.set("n", "<C-CR>", ":ObsidianFollowLink<CR>", { desc = "Follow link under cursor" })
-        vim.keymap.set("n", "<leader>olb", ":ObsidianBacklinks<CR>", { desc = "List backlinks to current buffer" })
-        vim.keymap.set("n", "<leader>olt", ":ObsidianTags<CR>", { desc = "List occurrences of given tags" })
-        vim.keymap.set("n", "<leader>odd", ":ObsidianToday<CR>", { desc = "Open today's daily note" })
+        vim.keymap.set("n", "<leader>of", ":ObsidianQuickSwitch<CR>", { desc = "Quickly switch to another note" })
+        vim.keymap.set("n", "<leader>os", ":ObsidianSearch<CR>", { desc = "Search for notes using ripgrep" })
+
+        vim.keymap.set("n", "<leader>od", ":ObsidianToday<CR>", { desc = "Open today's daily note" })
         vim.keymap.set("n", "<leader>odp", ":ObsidianToday -1<CR>", { desc = "Open yesterday's daily note" })
         vim.keymap.set("n", "<leader>odn", ":ObsidianToday 1<CR>", { desc = "Open tomorrow's daily note" })
         vim.keymap.set("n", "<leader>odl", ":ObsidianDailies<CR>", { desc = "List daily notes" })
-        vim.keymap.set("n", "<leader>oi", ":ObsidianTemplate<CR>", { desc = "Insert a template" })
-        vim.keymap.set("n", "<leader>of", ":ObsidianSearch<CR>", { desc = "Search for notes using ripgrep" })
+
+        vim.keymap.set("n", "<C-CR>", ":ObsidianFollowLink<CR>", { desc = "Follow link under cursor" })
+
+        vim.keymap.set("n", "<leader>olb", ":ObsidianBacklinks<CR>", { desc = "List backlinks to current buffer" })
+        vim.keymap.set("n", "<leader>olt", ":ObsidianTags<CR>", { desc = "List occurrences of given tags" })
+        vim.keymap.set("n", "<leader>olk", ":ObsidianLinks<CR>", { desc = "Collect all links in the current buffer" })
         vim.keymap.set("v", "<leader>oln", ":ObsidianLink<CR>", { desc = "Link selected text to a note" })
         vim.keymap.set("v", "<leader>olc", ":ObsidianLinkNew<CR>",
             { desc = "Create and link a new note to selected text" })
-        vim.keymap.set("n", "<leader>oll", ":ObsidianLinks<CR>", { desc = "Collect all links in the current buffer" })
+
+        vim.keymap.set("n", "<leader>ot", ":ObsidianTemplate<CR>", { desc = "Insert a template" })
+        vim.keymap.set("n", "<leader>otn", ":ObsidianNewFromTemplate<CR>", { desc = "Create a new note from a template" })
+        vim.keymap.set("n", "<leader>otc", ":ObsidianTOC<CR>", { desc = "Load table of contents of current note" })
+
         vim.keymap.set("v", "<leader>oe", ":ObsidianExtractNote<CR>", { desc = "Extract selected text to a new note" })
         vim.keymap.set("n", "<leader>ow", ":ObsidianWorkspace<CR>", { desc = "Switch workspace" })
         vim.keymap.set("n", "<leader>ov", ":ObsidianPasteImg<CR>", { desc = "Paste an image from clipboard" })
         vim.keymap.set("n", "<leader>or", ":ObsidianRename<CR>", { desc = "Rename current note and update backlinks" })
-        vim.keymap.set("n", "<leader>och", ":ObsidianToggleCheckbox<CR>", { desc = "Toggle checkbox state" })
-        vim.keymap.set("n", "<leader>ont", ":ObsidianNewFromTemplate<CR>", { desc = "Create a new note from a template" })
-        vim.keymap.set("n", "<leader>oc", ":ObsidianTOC<CR>", { desc = "Load table of contents of current note" })
+        -- vim.keymap.set("n", "<leader>och", ":ObsidianToggleCheckbox<CR>", { desc = "Toggle checkbox state" })
 
         require("obsidian").setup({
             workspaces = {
                 {
-                    name = "personal",
-                    path = "~/personal/notes",
+                    name = "notes",
+                    path = "~/notes",
                 },
             },
 
             log_level = vim.log.levels.INFO,
 
             daily_notes = {
-                -- Optional, if you keep daily notes in a separate directory.
-                folder = "0-Journal/daily",
-                -- Optional, if you want to change the date format for the ID of daily notes.
-                -- date_format = "%Y-%m-%d",
-                -- Optional, if you want to change the date format of the default alias of daily notes.
-                -- alias_format = "%B %-d, %Y",
-                -- Optional, default tags to add to each new daily note created.
-                -- default_tags = { "daily-notes" },
-                -- Optional, if you want to automatically insert a template from your template directory like 'daily.md'
-                template = "5-Other/templates/daily-template.md",
+                folder = "0-Journals/Life/daily",
+                template = "daily-template.md",
             },
 
             -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
@@ -125,9 +122,9 @@ return {
             end,
 
             -- Optional, customize how markdown links are formatted.
-            markdown_link_func = function(opts)
-                return require("obsidian.util").markdown_link(opts)
-            end,
+            -- markdown_link_func = function(opts)
+            --     return require("obsidian.util").markdown_link(opts)
+            -- end,
 
             -- Either 'wiki' or 'markdown'.
             preferred_link_style = "wiki",

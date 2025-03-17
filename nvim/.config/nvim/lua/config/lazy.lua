@@ -244,11 +244,11 @@ require("lazy").setup({
         },
         {
             "epwalsh/obsidian.nvim",
-            version = "*",
+            version = "3.9.0",
             lazy = true,
             event = {
-                "BufReadPre " .. vim.fn.expand "~" .. "personal/notes/*.md",
-                "BufNewFile " .. vim.fn.expand "~" .. "personal/notes/*.md",
+                "BufReadPre " .. vim.fn.expand "~" .. "notes/*.md",
+                "BufNewFile " .. vim.fn.expand "~" .. "notes/*.md",
             },
             dependencies = {
                 "nvim-lua/plenary.nvim",
@@ -305,13 +305,13 @@ require("lazy").setup({
         --         require("plugins.neorg").setup()
         --     end
         -- },
-        -- {
-        --     'MeanderingProgrammer/render-markdown.nvim',
-        --     dependencies = {
-        --         'nvim-treesitter/nvim-treesitter',
-        --         'echasnovski/mini.nvim', -- if you use the mini.nvim suite
-        --     },
-        -- },
+        {
+            'MeanderingProgrammer/render-markdown.nvim',
+            dependencies = {
+                'nvim-treesitter/nvim-treesitter',
+                'echasnovski/mini.nvim', -- if you use the mini.nvim suite
+            },
+        },
         -- {
         --     "iamcco/markdown-preview.nvim",
         --     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
@@ -351,8 +351,8 @@ require("plugins.curl").setup()
 require("plugins.which-key").setup()
 require("plugins.todo-comments").setup()
 require("plugins.ts-autotag").setup()
--- require("plugins.render-markdown").setup()
--- require("plugins.obsidian").setup()
+require("plugins.render-markdown").setup()
+require("plugins.obsidian").setup()
 require("plugins.oil").setup()
 
 require("mini.icons").setup()
