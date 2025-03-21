@@ -322,6 +322,28 @@ require("lazy").setup({
         --     -- end,
         --     build = ":call mkdp#util#install()",
         -- },
+        {
+            "nvimtools/none-ls.nvim",
+            dependencies = { "nvim-lua/plenary.nvim" },
+            config = function()
+                local null_ls = require("null-ls")
+
+                null_ls.setup({
+                    sources = {
+                        null_ls.builtins.formatting.prettier,
+                    },
+                })
+
+                -- Auto-format on save
+                vim.api.nvim_create_autocmd("BufWritePre", {
+                    pattern = "*",
+                    callback = function()
+                        vim.lsp.buf.format({ async = false })
+                    end,
+                })
+            end,
+
+        },
         'ThePrimeagen/vim-be-good',
         'RishabhRD/popfix',
         'RishabhRD/nvim-cheat.sh',
