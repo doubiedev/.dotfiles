@@ -37,6 +37,7 @@ return {
         })
 
         require('lspconfig').gdscript.setup(lspconfig_defaults.capabilities)
+        vim.keymap.set('n', '<leader>sg', function() vim.fn.serverstart '127.0.0.1:6004' end, { noremap = true })
 
         local cmp = require('cmp')
         require('luasnip.loaders.from_vscode').lazy_load()
