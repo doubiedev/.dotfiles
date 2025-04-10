@@ -8,8 +8,8 @@ return {
             require("todo-comments").jump_prev()
         end, { desc = "Previous todo comment" })
 
+        vim.keymap.set("n", "<leader>td", ":TodoQuickFix<CR>", { desc = "Open todo-comments with QuickFix List" })
         vim.keymap.set("n", "<leader>tt", ":TodoTelescope<CR>", { desc = "Open todo-comments with Telescope" })
-        vim.keymap.set("n", "<leader>tq", ":TodoQuickFix<CR>", { desc = "Open todo-comments with QuickFix List" })
 
         return {
             signs = true,      -- show icons in the signs column
