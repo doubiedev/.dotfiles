@@ -240,9 +240,6 @@ require("lazy").setup({
             opts = {}
         },
         {
-            "windwp/nvim-ts-autotag",
-        },
-        {
             "epwalsh/obsidian.nvim",
             version = "3.9.0",
             lazy = true,
@@ -344,6 +341,9 @@ require("lazy").setup({
             end,
 
         },
+        -- {
+        --     "windwp/nvim-ts-autotag",
+        -- },
         'ThePrimeagen/vim-be-good',
         'RishabhRD/popfix',
         'RishabhRD/nvim-cheat.sh',
