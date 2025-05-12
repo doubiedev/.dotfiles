@@ -40,7 +40,7 @@ return {
             log_level = vim.log.levels.INFO,
 
             daily_notes = {
-                folder = "0-Journals/Life/daily",
+                folder = "00-Journals/Life/daily",
                 template = "daily-template.md",
             },
 
@@ -156,7 +156,7 @@ return {
 
             -- Optional, for templates (see below).
             templates = {
-                folder = "5-Other/templates",
+                folder = "05-Other/templates",
                 date_format = "%Y-%m-%d",
                 time_format = "%H:%M",
                 -- A map for custom variables, the key should be the variable and the value a function
@@ -250,7 +250,7 @@ return {
             -- Optional, configure additional syntax highlighting / extmarks.
             -- This requires you have `conceallevel` set to 1 or 2. See `:help conceallevel` for more details.
             ui = {
-                enable = false,          -- set to false to disable all additional syntax features
+                enable = false,         -- set to false to disable all additional syntax features
                 update_debounce = 200,  -- update delay after a text change (in milliseconds)
                 max_file_length = 5000, -- disable UI features for files with more than this many lines
                 -- Define how various check-boxes are displayed
