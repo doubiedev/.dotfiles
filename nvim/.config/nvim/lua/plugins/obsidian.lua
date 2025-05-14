@@ -40,8 +40,8 @@ return {
             log_level = vim.log.levels.INFO,
 
             daily_notes = {
-                folder = "00-Journals/Life/daily",
-                template = "daily-template.md",
+                folder = "Journal/Daily",
+                template = "Temporal/Daily.md",
             },
 
             -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
@@ -156,7 +156,7 @@ return {
 
             -- Optional, for templates (see below).
             templates = {
-                folder = "05-Other/templates",
+                folder = "Templates",
                 date_format = "%Y-%m-%d",
                 time_format = "%H:%M",
                 -- A map for custom variables, the key should be the variable and the value a function
