@@ -38,7 +38,7 @@ return {
 
         require('lspconfig').gdscript.setup(lspconfig_defaults.capabilities)
         require('lspconfig').gdscript.setup({ cmd = { "godot-wsl-lsp" }, })
-        vim.keymap.set('n', '<leader>sg', function() vim.fn.serverstart '127.0.0.1:6004' end, { noremap = true })
+        vim.keymap.set('n', '<leader>go', function() vim.fn.serverstart '127.0.0.1:6004' end, { noremap = true })
 
         local cmp = require('cmp')
         require('luasnip.loaders.from_vscode').lazy_load()
