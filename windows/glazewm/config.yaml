@@ -16,7 +16,7 @@ general:
 
   # Whether to switch back and forth between the previously focused
   # workspace when focusing the current workspace.
-  toggle_workspace_on_refocus: true
+  toggle_workspace_on_refocus: false
 
   cursor_jump:
     # Whether to automatically move the cursor on the specified trigger.
@@ -59,7 +59,7 @@ window_effects:
     # Highlight the window with a colored border.
     # ** Exclusive to Windows 11 due to API limitations.
     border:
-      enabled: false
+      enabled: true
       color: '#8dbcff'
 
     # Remove the title bar from the window's frame. Note that this can
@@ -164,13 +164,11 @@ binding_modes:
       # Press enter/escape to return to default keybindings.
       - commands: ['wm-disable-binding-mode --name resize']
         bindings: ['escape', 'enter']
-        binding_modes:
   - name: 'disable_keybinds'
     keybindings:
-      # Use the same keybinding to exit this mode and return to normal.
+    # Use the same keybinding to exit this mode and return to normal
       - commands: ['wm-disable-binding-mode --name disable_keybinds']
         bindings: ['alt+oem_tilde']
-
 
 keybindings:
   # Shift focus in a given direction.
@@ -195,14 +193,15 @@ keybindings:
 
   # Resize focused window by a percentage or pixel amount.
   - commands: ['resize --width -2%']
-    bindings: ['24+u']
+    bindings: ['alt+u']
   - commands: ['resize --width +2%']
     bindings: ['alt+p']
   - commands: ['resize --height +2%']
     bindings: ['alt+o']
   - commands: ['resize --height -2%']
-    bindings: ['f2+i']
+    bindings: ['alt+i']
 
+  # As an alternative to the resize keybindings above, resize mode enables
   # resizing via arrow keys or HJKL. The binding mode is defined above with
   # the name 'resize'.
   - commands: ['wm-enable-binding-mode --name resize']
