@@ -148,6 +148,12 @@ window_rules:
         window_title: { regex: '.*? - Peek' }
       - window_process: { equals: 'Lively' }
         window_class: { regex: 'HwndWrapper' }
+  - commands: ['set-floating']
+    match:
+      - window_process: { regex: '.*Godot.*' }
+      - window_class: { equals: 'Engine' }
+      - window_process: { regex: '.*GIMP.*' }
+      - window_class: { regex: '.*gdk.*' }
 
 binding_modes:
   # When enabled, the focused window can be resized via arrow keys or HJKL.
