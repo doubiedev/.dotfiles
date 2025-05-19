@@ -6,3 +6,14 @@ os:
   # A built-in preset that sets all of the above settings. Supported presets
   # are defined in the getPreset function in editor_presets.go.
   editPreset: "nvim"
+
+customCommands:
+  - key: 'U'
+    command: 'git submodule update --init --recursive'
+    context: 'files'
+    description: 'Update submodules'
+    stream: true
+  - key: 'u'
+    command: 'git submodule update -- {{.SelectedFile.Name}}'
+    context: 'files'
+    description: 'Update submodule'
