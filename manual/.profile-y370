@@ -118,6 +118,7 @@ if ! shopt -oq posix; then
 fi
 
 eval "$(starship init bash)"
+eval ``keychain --eval --agents ssh id_ed25519
 
 # neofetch_count=$(ps aux | grep -i "neofetch" | grep -v "grep" | wc -l)
 #
@@ -126,8 +127,7 @@ eval "$(starship init bash)"
 # fi
 
 alias nvim='~/.local/bin/nvim/bin/nvim'
-alias vim='nvim'
-alias pomo='pomodoro'
+alias v='nvim'
 alias c='xclip -selection clipboard'
 
 export GPG_AGENT_INFO=$(gnome-keyring-daemon)
@@ -141,4 +141,3 @@ export PATH=$PATH:$HOME/go/bin
 export PATH="$HOME/Applications:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.local/bin/nvim/bin:$PATH"
-export PATH="$HOME/.local/scripts:$PATH"

@@ -6,3 +6,14 @@ Requires:
 - gcc
 - (some others not listed - need to include)
 - [ghostty](https://github.com/mkasberg/ghostty-ubuntu)
+- keychain
+- i3
+    - syncthing
+    - nitrogen
+    - todoist
+    - maim
+    - xclip
+    - playlists (syncthing)
+    - vlc
+    - redshift
+    - obsidian

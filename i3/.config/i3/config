@@ -327,7 +327,7 @@ exec --no-startup-id /home/nd/Applications/Todoist
 bindsym $mod+t exec --no-startup-id /home/nd/Applications/Todoist
 
 # Workspaces
-exec i3-msg 'workspace 3, exec i3-sensible-terminal'
+exec i3-msg 'workspace 2, exec i3-sensible-terminal'
 
 # ------------------------------------------
 # THEME
