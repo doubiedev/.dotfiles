@@ -187,6 +187,7 @@ workspace_auto_back_and_forth no
 # ------------------------------------------
 # bindsym [--release] [<Group>+][<Modifiers>+]<keysym> command
 
+# SYSTEM
 # Swapping windows
 bindsym $mod+Tab workspace back_and_forth
 
@@ -197,20 +198,13 @@ bindsym $mod+Shift+semicolon move workspace to output next
 # Suspend
 bindsym $mod+Shift+period exec systemctl suspend
 
-# Rofi
-bindsym $mod+d exec --no-startup-id rofi -show drun
-bindsym $mod+Shift+d exec --no-startup-id rofi -show run
-# want to make a command which runs rofi -show window as long as alt is held
-# bindsym $mod+Tab exec --no-startup-id rofi -show window
-bindsym $mod+Shift+s exec --no-startup-id rofi -show ssh
+# Monitor focus swapping
+# bindsym $mod+comma focus output left
+# bindsym $mod+period focus output right
 
-
-# Browser
-bindsym $mod+b exec brave-browser
-bindsym $mod+Shift+b exec brave-browser --incognito
-
-# File Explorer (Nautilus)
-bindsym $mod+f exec nautilus
+# Monitor move focused window
+bindsym $mod+Shift+greater move container to output right
+bindsym $mod+Shift+less move container to output left
 
 # Audio - Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -223,14 +217,8 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 bindsym XF86MonBrightnessUp exec --no-startup-id ~/.local/scripts/brightness-up.sh && $refresh_i3status
 bindsym XF86MonBrightnessDown exec --no-startup-id ~/.local/scripts/brightness-down.sh && $refresh_i3status
 
-
-# Obsidian
-bindsym $mod+o exec /home/nd/Applications/Obsidian
-# Todoist
-bindsym $mod+t exec /home/nd/Applications/Todoist
-
-
-# Redshift modes
+# SYSTEM MODES
+# Redshift
 bindsym $mod+n mode "$mode_redshift"
 set $mode_redshift Set colour temperature: (a)uto, (r)eset, (1)900K (2)500K, (3)000K, (4)000K, (5)000K
 set $kill_redshift pkill -9 redshift;
@@ -246,10 +234,7 @@ mode "$mode_redshift" {
     bindsym Escape mode "default"
 }
 
-# Vlc
-bindsym $mod+Shift+v exec vlc
-
-# Mpv music playlists
+# Music playlists (mpv)
 bindsym $mod+m mode "$mode_music"
 set $mode_music Set Music Playlist: (1)Synthwave, (2)Ambient Mixes
 set $kill_music pkill -9 mpv;
@@ -260,51 +245,7 @@ mode "$mode_music" {
     bindsym Escape mode "default"
 }
 
-
-# ----------------------------------------------------------------------------------------------------------------
-# Add this to your i3 config to take a screenshot (selection) and save it to the clipboard just by pressing PrtSc!
-# The resulting file will have this format: screenshot_02-Dec-2021_13-24-21.png
-#
-# NOTE: This assumes you have a directory ~/screenshots and you have installed:
-#   - maim
-#   - xclip
-# ----------------------------------------------------------------------------------------------------------------
-
-# screenshot (saves to clipboard and a file in ~/screenshots)
-# key: PrtSc
-bindsym Print exec NOW=$(date +%Y-%m-%d_%H-%M-%S) && maim --format png --select > ~/Pictures/Screenshots/screenshot_$NOW.png && xclip -selection clip -t image/png ~/screenshots/screenshot_$NOW.png
-
-# ------------------------------------------
-# LAUNCH ON LOGIN
-# ------------------------------------------
-
-# exec /usr/bin/pasystray
-
-# GNOME
-# -----
-# Keyring & SSH
-exec_always dbus-update-activation-environment --all
-# exec_always /usr/bin/gnome-keyring-daemon --start --components=ssh,secrets,pkcs11
-exec_always /usr/bin/gnome-keyring-daemon --start --components=secrets,pkcs11
-# exec_always ssh-add --eval
-# exec_always --no-startup-id "eval `ssh-agent` && ssh-add ~/.ssh/github"
-exec_always --no-startup-id env XDG_CURRENT_DESKTOP=GNOME
-
-
-# Unneeded - intended to allow for gnome-tweaks to work changing shell theme
-# Restore GNOME's settings
-# exec --no-startup-id /usr/libexec/gnome-settings-daemon-localeexec
-# Fix a bug in gnome-settings-daemon: http://feeding.cloud.geek.nz/posts/creating-a-modern-tiling-desktop-environment-using-i3/
-# exec --no-startup-id dconf write /org/gnome/settings-daemon/plugins/cursor/active false
-
-# change focus between monitors
-# bindsym $mod+comma focus output left
-# bindsym $mod+period focus output right
-
-# move focused window between monitors
-bindsym $mod+Shift+greater move container to output right
-bindsym $mod+Shift+less move container to output left
-
+# Display
 bindsym $mod+p mode "$mode_xrandr"
 set $mode_xrandr Set monitors: (r)eset, (2)dual-monitors-hdmi, (3)single-ext-monitor
 mode "$mode_xrandr" {
@@ -317,17 +258,57 @@ mode "$mode_xrandr" {
     bindsym Escape mode "default"
 }
 
+# APPLICATIONS
+# Rofi
+bindsym $mod+d exec --no-startup-id rofi -show drun
+bindsym $mod+Shift+d exec --no-startup-id rofi -show run
+bindsym $mod+Shift+s exec --no-startup-id rofi -show ssh
+
+# Browser
+bindsym $mod+b exec brave-browser
+bindsym $mod+Shift+b exec brave-browser --incognito
+
+# File Explorer (Nautilus)
+bindsym $mod+f exec nautilus
+
+# Obsidian
+bindsym $mod+o exec /home/nd/Applications/Obsidian
+
+# Todoist
+bindsym $mod+t exec /home/nd/Applications/Todoist
+
+# Vlc
+bindsym $mod+Shift+v exec vlc
+
+# Screenshots
+# key: PrtSc
+# dependencies: maim, xclip
+bindsym Print exec NOW=$(date +%Y-%m-%d_%H-%M-%S) && maim --format png --select > ~/Pictures/screenshots/screenshot_$NOW.png && xclip -selection clip -t image/png ~/screenshots/screenshot_$NOW.png
+
+# ------------------------------------------
+# LAUNCH ON LOGIN
+# ------------------------------------------
+
+# SYSTEM
+# Gnome Keyring & SSH
+exec_always dbus-update-activation-environment --all
+# keyring can have --components=ssh,secrets,pkcs11
+exec_always /usr/bin/gnome-keyring-daemon --start --components=secrets,pkcs11
+exec_always --no-startup-id env XDG_CURRENT_DESKTOP=GNOME
+
+# APPLICATIONS
 # Syncthing
 exec syncthing -no-browser
 
 # Nitrogen - Wallpapers
 exec --no-startup-id nitrogen --restore
 
+# WORKSPACES
 # Workspace rules
 assign [class="obsidian"] 8
 assign [class="Todoist"] 9
 
-# Workspaces
+# Workspace startup
 exec i3-msg 'workspace 2, exec i3-sensible-terminal'
 exec /home/nd/Applications/Obsidian
 exec /home/nd/Applications/Todoist
@@ -362,4 +343,3 @@ bar {
 }
 
 # bindsym $mod+d exec "dmenu_run -nf '#F8F8F2' -nb '#282A36' -sb '#6272A4' -sf '#F8F8F2' -fn 'monospace-10' -p 'dmenu%'"
-
