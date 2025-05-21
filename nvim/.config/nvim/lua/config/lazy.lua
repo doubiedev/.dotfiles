@@ -97,8 +97,10 @@ vim.opt.backup = false
 vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
 
-vim.opt.hlsearch = false
+vim.opt.hlsearch = true
 vim.opt.incsearch = true
+vim.opt.smartcase = true
+vim.opt.ignorecase = false
 
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
@@ -148,6 +150,15 @@ autocmd({ "BufWritePre" }, {
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
+
+vim.on_key(function(char)
+    if vim.fn.mode() == "n" then
+        local new_hlsearch = vim.tbl_contains({ "", "n", "N", "*", "#", "?", "/" }, vim.fn.keytrans(char))
+        if vim.opt.hlsearch:get() ~= new_hlsearch then
+            vim.opt.hlsearch = new_hlsearch
+        end
+    end
+end, vim.api.nvim_create_namespace "auto_hlsearch")
 
 -- ============================================================================
 -- LAZY - SETUP
