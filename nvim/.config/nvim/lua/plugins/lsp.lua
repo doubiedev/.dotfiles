@@ -124,13 +124,15 @@ return {
         require('mason').setup({})
         require('mason-lspconfig').setup({
             ensure_installed = {
-                'eslint',
+                -- 'gopls',
                 'lua_ls',
-                'gopls',
                 'marksman',
             },
             handlers = {
                 function(server_name)
+                    if server_name == "eslint" then
+                        return
+                    end
                     require('lspconfig')[server_name].setup({})
                 end,
             },
