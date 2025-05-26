@@ -35,6 +35,17 @@ return {
                     name = "notes",
                     path = "~/notes",
                 },
+                {
+                    name = "devlog",
+                    path = "~/notes/DevLog",
+                    strict = true,
+                    overrides = {
+                        daily_notes = {
+                            folder = "../DevLog",
+                            template = "../Templates/Temporal/DevLogDaily.md",
+                        }
+                    },
+                },
             },
 
             log_level = vim.log.levels.INFO,
