@@ -47,7 +47,7 @@
 --- @field [integer] vim.tohtml.line (integer: (1-index, exclusive))
 
 --- @class (private) vim.tohtml.line
---- @field virt_lines {[integer]:{[1]:string,[2]:integer}[]}
+--- @field virt_lines {[integer]:[string,integer][]}
 --- @field pre_text string[][]
 --- @field hide? boolean
 --- @field [integer] vim.tohtml.cell? (integer: (1-index, exclusive))
@@ -66,9 +66,7 @@ local function notify(msg)
   if #notifications == 0 then
     vim.schedule(function()
       if #notifications > 1 then
-        vim.notify(
-          ('TOhtml: %s (+ %d more warnings)'):format(notifications[1], tostring(#notifications - 1))
-        )
+        vim.notify(('TOhtml: %s (+ %d more warnings)'):format(notifications[1], #notifications - 1))
       elseif #notifications == 1 then
         vim.notify('TOhtml: ' .. notifications[1])
       end
@@ -207,7 +205,9 @@ local function try_query_terminal_color(color)
     once = true,
     callback = function(args)
       hex = '#'
-        .. table.concat({ args.data:match('\027%]%d+;%d*;?rgb:(%w%w)%w%w/(%w%w)%w%w/(%w%w)%w%w') })
+        .. table.concat({
+          args.data.sequence:match('\027%]%d+;%d*;?rgb:(%w%w)%w%w/(%w%w)%w%w/(%w%w)%w%w'),
+        })
     end,
   })
   if type(color) == 'number' then
@@ -319,7 +319,7 @@ end
 --- @return nil|integer
 local function register_hl(state, hl)
   if type(hl) == 'table' then
-    hl = hl[#hl]
+    hl = hl[#hl] --- @type string|integer
   end
   if type(hl) == 'nil' then
     return
@@ -486,7 +486,7 @@ local function styletable_treesitter(state)
 end
 
 --- @param state vim.tohtml.state
---- @param extmark {[1]:integer,[2]:integer,[3]:integer,[4]:vim.api.keyset.set_extmark|any}
+--- @param extmark [integer, integer, integer, vim.api.keyset.set_extmark|any]
 --- @param namespaces table<integer,string>
 local function _styletable_extmarks_highlight(state, extmark, namespaces)
   if not extmark[4].hl_group then
@@ -494,7 +494,7 @@ local function _styletable_extmarks_highlight(state, extmark, namespaces)
   end
   ---TODO(altermo) LSP semantic tokens (and some other extmarks) are only
   ---generated in visible lines, and not in the whole buffer.
-  if (namespaces[extmark[4].ns_id] or ''):find('vim_lsp_semantic_tokens') then
+  if (namespaces[extmark[4].ns_id] or ''):find('nvim.lsp.semantic_tokens') then
     notify('lsp semantic tokens are not supported, HTML may be incorrect')
     return
   end
@@ -508,7 +508,7 @@ local function _styletable_extmarks_highlight(state, extmark, namespaces)
 end
 
 --- @param state vim.tohtml.state
---- @param extmark {[1]:integer,[2]:integer,[3]:integer,[4]:vim.api.keyset.set_extmark|any}
+--- @param extmark [integer, integer, integer, vim.api.keyset.set_extmark|any]
 --- @param namespaces table<integer,string>
 local function _styletable_extmarks_virt_text(state, extmark, namespaces)
   if not extmark[4].virt_text then
@@ -516,7 +516,7 @@ local function _styletable_extmarks_virt_text(state, extmark, namespaces)
   end
   ---TODO(altermo) LSP semantic tokens (and some other extmarks) are only
   ---generated in visible lines, and not in the whole buffer.
-  if (namespaces[extmark[4].ns_id] or ''):find('vim_lsp_inlayhint') then
+  if (namespaces[extmark[4].ns_id] or ''):find('nvim.lsp.inlayhint') then
     notify('lsp inlay hints are not supported, HTML may be incorrect')
     return
   end
@@ -567,7 +567,7 @@ local function _styletable_extmarks_virt_text(state, extmark, namespaces)
 end
 
 --- @param state vim.tohtml.state
---- @param extmark {[1]:integer,[2]:integer,[3]:integer,[4]:vim.api.keyset.set_extmark|any}
+--- @param extmark [integer, integer, integer, vim.api.keyset.set_extmark|any]
 local function _styletable_extmarks_virt_lines(state, extmark)
   ---TODO(altermo) if the fold start is equal to virt_line start then the fold hides the virt_line
   if not extmark[4].virt_lines then
@@ -588,7 +588,7 @@ local function _styletable_extmarks_virt_lines(state, extmark)
 end
 
 --- @param state vim.tohtml.state
---- @param extmark {[1]:integer,[2]:integer,[3]:integer,[4]:vim.api.keyset.set_extmark|any}
+--- @param extmark [integer, integer, integer, vim.api.keyset.set_extmark|any]
 local function _styletable_extmarks_conceal(state, extmark)
   if not extmark[4].conceal or state.opt.conceallevel == 0 then
     return
@@ -654,9 +654,9 @@ end
 --- @param state vim.tohtml.state
 local function styletable_conceal(state)
   local bufnr = state.bufnr
-  vim.api.nvim_buf_call(bufnr, function()
+  vim._with({ buf = bufnr }, function()
     for row = state.start, state.end_ do
-      --- @type table<integer,{[1]:integer,[2]:integer,[3]:string}>
+      --- @type table<integer,[integer,integer,string]>
       local conceals = {}
       local line_len_exclusive = #vim.fn.getline(row) + 1
       for col = 1, line_len_exclusive do
@@ -772,7 +772,7 @@ local function styletable_statuscolumn(state)
     if foldcolumn:match('^auto') then
       local max = tonumber(foldcolumn:match('^%w-:(%d)')) or 1
       local maxfold = 0
-      vim.api.nvim_buf_call(state.bufnr, function()
+      vim._with({ buf = state.bufnr }, function()
         for row = state.start, state.end_ do
           local foldlevel = vim.fn.foldlevel(row)
           if foldlevel > maxfold then
@@ -1005,6 +1005,7 @@ local function extend_style(out, state)
     --TODO(altermo) use local namespace (instead of global 0)
     local fg = vim.fn.synIDattr(hlid, 'fg#')
     local bg = vim.fn.synIDattr(hlid, 'bg#')
+    local sp = vim.fn.synIDattr(hlid, 'sp#')
     local decor_line = {}
     if vim.fn.synIDattr(hlid, 'underline') ~= '' then
       table.insert(decor_line, 'underline')
@@ -1022,6 +1023,8 @@ local function extend_style(out, state)
       ['font-weight'] = vim.fn.synIDattr(hlid, 'bold') ~= '' and 'bold' or nil,
       ['text-decoration-line'] = not vim.tbl_isempty(decor_line) and table.concat(decor_line, ' ')
         or nil,
+      -- TODO(ribru17): fallback to displayed text color if sp not set
+      ['text-decoration-color'] = sp ~= '' and cterm_to_hex(sp) or nil,
       --TODO(altermo) if strikethrough and undercurl then the strikethrough becomes wavy
       ['text-decoration-style'] = vim.fn.synIDattr(hlid, 'undercurl') ~= '' and 'wavy' or nil,
     }
@@ -1161,7 +1164,9 @@ local function extend_pre(out, state)
       s = s .. _pre_text_to_html(state, row)
     end
     local true_line_len = #line + 1
-    for k in pairs(style_line) do
+    for k in
+      pairs(style_line --[[@as table<string,any>]])
+    do
       if type(k) == 'number' and k > true_line_len then
         true_line_len = k
       end
@@ -1292,9 +1297,25 @@ local function opt_to_global_state(opt, title)
   local fonts = {}
   if opt.font then
     fonts = type(opt.font) == 'string' and { opt.font } or opt.font --[[@as (string[])]]
+    for i, v in pairs(fonts) do
+      fonts[i] = ('"%s"'):format(v)
+    end
   elseif vim.o.guifont:match('^[^:]+') then
-    table.insert(fonts, vim.o.guifont:match('^[^:]+'))
+    -- Example:
+    -- Input: "Font,Escape\,comma, Ignore space after comma"
+    -- Output: { "Font","Escape,comma","Ignore space after comma" }
+    local prev = ''
+    for name in vim.gsplit(vim.o.guifont:match('^[^:]+'), ',', { trimempty = true }) do
+      if vim.endswith(name, '\\') then
+        prev = prev .. vim.trim(name:sub(1, -2) .. ',')
+      elseif vim.trim(name) ~= '' then
+        table.insert(fonts, ('"%s%s"'):format(prev, vim.trim(name)))
+        prev = ''
+      end
+    end
   end
+  -- Generic family names (monospace here) must not be quoted
+  -- because the browser recognizes them as font families.
   table.insert(fonts, 'monospace')
   --- @type vim.tohtml.state.global
   local state = {
@@ -1323,7 +1344,7 @@ local styletable_funcs = {
 
 --- @param state vim.tohtml.state
 local function state_generate_style(state)
-  vim.api.nvim_win_call(state.winid, function()
+  vim._with({ win = state.winid }, function()
     for _, fn in ipairs(styletable_funcs) do
       --- @type string?
       local cond
@@ -1351,6 +1372,7 @@ local function win_to_html(winid, opt)
   state_generate_style(state)
 
   local html = {}
+  table.insert(html, '<!-- vim: set nomodeline: -->')
   extend_html(html, function()
     extend_head(html, global_state)
     extend_body(html, function()

@@ -12,11 +12,9 @@ end
 
 local sysname = vim.uv.os_uname().sysname
 
--- Protocol for the Microsoft Language Server Protocol (mslsp)
-local protocol = {}
-
+--- @class vim.lsp.protocol.constants
+--- @nodoc
 local constants = {
-  --- @enum lsp.DiagnosticSeverity
   DiagnosticSeverity = {
     -- Reports an error.
     Error = 1,
@@ -28,7 +26,6 @@ local constants = {
     Hint = 4,
   },
 
-  --- @enum lsp.DiagnosticTag
   DiagnosticTag = {
     -- Unused or unnecessary code
     Unnecessary = 1,
@@ -36,7 +33,6 @@ local constants = {
     Deprecated = 2,
   },
 
-  ---@enum lsp.MessageType
   MessageType = {
     -- An error message.
     Error = 1,
@@ -46,10 +42,11 @@ local constants = {
     Info = 3,
     -- A log message.
     Log = 4,
+    -- A debug message.
+    Debug = 5,
   },
 
   -- The file event type.
-  ---@enum lsp.FileChangeType
   FileChangeType = {
     -- The file got created.
     Created = 1,
@@ -100,6 +97,13 @@ local constants = {
     TriggerForIncompleteCompletions = 3,
   },
 
+  -- Completion item tags are extra annotations that tweak the rendering of a
+  -- completion item
+  CompletionTag = {
+    -- Render a completion as obsolete, usually using a strike-out.
+    Deprecated = 1,
+  },
+
   -- A document highlight kind.
   DocumentHighlightKind = {
     -- A textual occurrence.
@@ -141,7 +145,6 @@ local constants = {
   },
 
   -- Represents reasons why a text document is saved.
-  ---@enum lsp.TextDocumentSaveReason
   TextDocumentSaveReason = {
     -- Manually triggered, e.g. by the user pressing save, by starting debugging,
     -- or by an API call.
@@ -166,6 +169,7 @@ local constants = {
     -- Defined by the protocol.
     RequestCancelled = -32800,
     ContentModified = -32801,
+    ServerCancelled = -32802,
   },
 
   -- Describes the content type that a client supports in various
@@ -237,7 +241,6 @@ local constants = {
 
   -- Defines whether the insert text in a completion item should be interpreted as
   -- plain text or a snippet.
-  --- @enum lsp.InsertTextFormat
   InsertTextFormat = {
     -- The primary text to be inserted is treated as a plain string.
     PlainText = 1,
@@ -296,7 +299,6 @@ local constants = {
     SourceOrganizeImports = 'source.organizeImports',
   },
   -- The reason why code actions were requested.
-  ---@enum lsp.CodeActionTriggerKind
   CodeActionTriggerKind = {
     -- Code actions were explicitly requested by the user or by an extension.
     Invoked = 1,
@@ -308,326 +310,20 @@ local constants = {
   },
 }
 
-for k1, v1 in pairs(constants) do
-  local tbl = vim.deepcopy(v1, true)
-  for _, k2 in ipairs(vim.tbl_keys(tbl)) do
-    local v2 = tbl[k2]
-    tbl[v2] = k2
+--- Protocol for the Microsoft Language Server Protocol (mslsp)
+--- @class vim.lsp.protocol : vim.lsp.protocol.constants
+--- @nodoc
+local protocol = {}
+
+--- @diagnostic disable:no-unknown
+for k1, v1 in pairs(vim.deepcopy(constants, true)) do
+  for _, k2 in ipairs(vim.tbl_keys(v1)) do
+    local v2 = v1[k2]
+    v1[v2] = k2
   end
-  protocol[k1] = tbl
+  protocol[k1] = v1
 end
-
---[=[
---Text document specific client capabilities.
-export interface TextDocumentClientCapabilities {
-  synchronization?: {
-    --Whether text document synchronization supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client supports sending will save notifications.
-    willSave?: boolean;
-    --The client supports sending a will save request and
-    --waits for a response providing text edits which will
-    --be applied to the document before it is saved.
-    willSaveWaitUntil?: boolean;
-    --The client supports did save notifications.
-    didSave?: boolean;
-  }
-  --Capabilities specific to the `textDocument/completion`
-  completion?: {
-    --Whether completion supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client supports the following `CompletionItem` specific
-    --capabilities.
-    completionItem?: {
-      --The client supports snippets as insert text.
-      --
-      --A snippet can define tab stops and placeholders with `$1`, `$2`
-      --and `${3:foo}`. `$0` defines the final tab stop, it defaults to
-      --the end of the snippet. Placeholders with equal identifiers are linked,
-      --that is typing in one will update others too.
-      snippetSupport?: boolean;
-      --The client supports commit characters on a completion item.
-      commitCharactersSupport?: boolean
-      --The client supports the following content formats for the documentation
-      --property. The order describes the preferred format of the client.
-      documentationFormat?: MarkupKind[];
-      --The client supports the deprecated property on a completion item.
-      deprecatedSupport?: boolean;
-      --The client supports the preselect property on a completion item.
-      preselectSupport?: boolean;
-    }
-    completionItemKind?: {
-      --The completion item kind values the client supports. When this
-      --property exists the client also guarantees that it will
-      --handle values outside its set gracefully and falls back
-      --to a default value when unknown.
-      --
-      --If this property is not present the client only supports
-      --the completion items kinds from `Text` to `Reference` as defined in
-      --the initial version of the protocol.
-      valueSet?: CompletionItemKind[];
-    },
-    --The client supports to send additional context information for a
-    --`textDocument/completion` request.
-    contextSupport?: boolean;
-  };
-  --Capabilities specific to the `textDocument/hover`
-  hover?: {
-    --Whether hover supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client supports the follow content formats for the content
-    --property. The order describes the preferred format of the client.
-    contentFormat?: MarkupKind[];
-  };
-  --Capabilities specific to the `textDocument/signatureHelp`
-  signatureHelp?: {
-    --Whether signature help supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client supports the following `SignatureInformation`
-    --specific properties.
-    signatureInformation?: {
-      --The client supports the follow content formats for the documentation
-      --property. The order describes the preferred format of the client.
-      documentationFormat?: MarkupKind[];
-      --Client capabilities specific to parameter information.
-      parameterInformation?: {
-        --The client supports processing label offsets instead of a
-        --simple label string.
-        --
-        --Since 3.14.0
-        labelOffsetSupport?: boolean;
-      }
-    };
-  };
-  --Capabilities specific to the `textDocument/references`
-  references?: {
-    --Whether references supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/documentHighlight`
-  documentHighlight?: {
-    --Whether document highlight supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/documentSymbol`
-  documentSymbol?: {
-    --Whether document symbol supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --Specific capabilities for the `SymbolKind`.
-    symbolKind?: {
-      --The symbol kind values the client supports. When this
-      --property exists the client also guarantees that it will
-      --handle values outside its set gracefully and falls back
-      --to a default value when unknown.
-      --
-      --If this property is not present the client only supports
-      --the symbol kinds from `File` to `Array` as defined in
-      --the initial version of the protocol.
-      valueSet?: SymbolKind[];
-    }
-    --The client supports hierarchical document symbols.
-    hierarchicalDocumentSymbolSupport?: boolean;
-  };
-  --Capabilities specific to the `textDocument/formatting`
-  formatting?: {
-    --Whether formatting supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/rangeFormatting`
-  rangeFormatting?: {
-    --Whether range formatting supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/onTypeFormatting`
-  onTypeFormatting?: {
-    --Whether on type formatting supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/declaration`
-  declaration?: {
-    --Whether declaration supports dynamic registration. If this is set to `true`
-    --the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
-    --return value for the corresponding server capability as well.
-    dynamicRegistration?: boolean;
-    --The client supports additional metadata in the form of declaration links.
-    --
-    --Since 3.14.0
-    linkSupport?: boolean;
-  };
-  --Capabilities specific to the `textDocument/definition`.
-  --
-  --Since 3.14.0
-  definition?: {
-    --Whether definition supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client supports additional metadata in the form of definition links.
-    linkSupport?: boolean;
-  };
-  --Capabilities specific to the `textDocument/typeDefinition`
-  --
-  --Since 3.6.0
-  typeDefinition?: {
-    --Whether typeDefinition supports dynamic registration. If this is set to `true`
-    --the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
-    --return value for the corresponding server capability as well.
-    dynamicRegistration?: boolean;
-    --The client supports additional metadata in the form of definition links.
-    --
-    --Since 3.14.0
-    linkSupport?: boolean;
-  };
-  --Capabilities specific to the `textDocument/implementation`.
-  --
-  --Since 3.6.0
-  implementation?: {
-    --Whether implementation supports dynamic registration. If this is set to `true`
-    --the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
-    --return value for the corresponding server capability as well.
-    dynamicRegistration?: boolean;
-    --The client supports additional metadata in the form of definition links.
-    --
-    --Since 3.14.0
-    linkSupport?: boolean;
-  };
-  --Capabilities specific to the `textDocument/codeAction`
-  codeAction?: {
-    --Whether code action supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client support code action literals as a valid
-    --response of the `textDocument/codeAction` request.
-    --
-    --Since 3.8.0
-    codeActionLiteralSupport?: {
-      --The code action kind is support with the following value
-      --set.
-      codeActionKind: {
-        --The code action kind values the client supports. When this
-        --property exists the client also guarantees that it will
-        --handle values outside its set gracefully and falls back
-        --to a default value when unknown.
-        valueSet: CodeActionKind[];
-      };
-    };
-  };
-  --Capabilities specific to the `textDocument/codeLens`
-  codeLens?: {
-    --Whether code lens supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/documentLink`
-  documentLink?: {
-    --Whether document link supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `textDocument/documentColor` and the
-  --`textDocument/colorPresentation` request.
-  --
-  --Since 3.6.0
-  colorProvider?: {
-    --Whether colorProvider supports dynamic registration. If this is set to `true`
-    --the client supports the new `(ColorProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
-    --return value for the corresponding server capability as well.
-    dynamicRegistration?: boolean;
-  }
-  --Capabilities specific to the `textDocument/rename`
-  rename?: {
-    --Whether rename supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --The client supports testing for validity of rename operations
-    --before execution.
-    prepareSupport?: boolean;
-  };
-  --Capabilities specific to `textDocument/publishDiagnostics`.
-  publishDiagnostics?: {
-    --Whether the clients accepts diagnostics with related information.
-    relatedInformation?: boolean;
-    --Client supports the tag property to provide meta data about a diagnostic.
-	  --Clients supporting tags have to handle unknown tags gracefully.
-    --Since 3.15.0
-    tagSupport?: {
-      --The tags supported by this client
-      valueSet: DiagnosticTag[];
-    };
-  };
-  --Capabilities specific to `textDocument/foldingRange` requests.
-  --
-  --Since 3.10.0
-  foldingRange?: {
-    --Whether implementation supports dynamic registration for folding range providers. If this is set to `true`
-    --the client supports the new `(FoldingRangeProviderOptions & TextDocumentRegistrationOptions & StaticRegistrationOptions)`
-    --return value for the corresponding server capability as well.
-    dynamicRegistration?: boolean;
-    --The maximum number of folding ranges that the client prefers to receive per document. The value serves as a
-    --hint, servers are free to follow the limit.
-    rangeLimit?: number;
-    --If set, the client signals that it only supports folding complete lines. If set, client will
-    --ignore specified `startCharacter` and `endCharacter` properties in a FoldingRange.
-    lineFoldingOnly?: boolean;
-  };
-}
---]=]
-
---[=[
---Workspace specific client capabilities.
-export interface WorkspaceClientCapabilities {
-  --The client supports applying batch edits to the workspace by supporting
-  --the request 'workspace/applyEdit'
-  applyEdit?: boolean;
-  --Capabilities specific to `WorkspaceEdit`s
-  workspaceEdit?: {
-    --The client supports versioned document changes in `WorkspaceEdit`s
-    documentChanges?: boolean;
-    --The resource operations the client supports. Clients should at least
-    --support 'create', 'rename' and 'delete' files and folders.
-    resourceOperations?: ResourceOperationKind[];
-    --The failure handling strategy of a client if applying the workspace edit
-    --fails.
-    failureHandling?: FailureHandlingKind;
-  };
-  --Capabilities specific to the `workspace/didChangeConfiguration` notification.
-  didChangeConfiguration?: {
-    --Did change configuration notification supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
-  didChangeWatchedFiles?: {
-    --Did change watched files notification supports dynamic registration. Please note
-    --that the current protocol doesn't support static configuration for file changes
-    --from the server side.
-    dynamicRegistration?: boolean;
-  };
-  --Capabilities specific to the `workspace/symbol` request.
-  symbol?: {
-    --Symbol request supports dynamic registration.
-    dynamicRegistration?: boolean;
-    --Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
-    symbolKind?: {
-      --The symbol kind values the client supports. When this
-      --property exists the client also guarantees that it will
-      --handle values outside its set gracefully and falls back
-      --to a default value when unknown.
-      --
-      --If this property is not present the client only supports
-      --the symbol kinds from `File` to `Array` as defined in
-      --the initial version of the protocol.
-      valueSet?: SymbolKind[];
-    }
-  };
-  --Capabilities specific to the `workspace/executeCommand` request.
-  executeCommand?: {
-    --Execute command supports dynamic registration.
-    dynamicRegistration?: boolean;
-  };
-  --The client has support for workspace folders.
-  --
-  --Since 3.6.0
-  workspaceFolders?: boolean;
-  --The client supports `workspace/configuration` requests.
-  --
-  --Since 3.6.0
-  configuration?: boolean;
-}
---]=]
+--- @diagnostic enable:no-unknown
 
 --- Gets a new ClientCapabilities object describing the LSP client
 --- capabilities.
@@ -636,7 +332,9 @@ function protocol.make_client_capabilities()
   return {
     general = {
       positionEncodings = {
+        'utf-8',
         'utf-16',
+        'utf-32',
       },
     },
     textDocument = {
@@ -726,7 +424,20 @@ function protocol.make_client_capabilities()
         isPreferredSupport = true,
         dataSupport = true,
         resolveSupport = {
-          properties = { 'edit' },
+          properties = { 'edit', 'command' },
+        },
+      },
+      codeLens = {
+        dynamicRegistration = false,
+        resolveSupport = {
+          properties = { 'command' },
+        },
+      },
+      foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true,
+        foldingRange = {
+          collapsedText = true,
         },
       },
       formatting = {
@@ -734,18 +445,25 @@ function protocol.make_client_capabilities()
       },
       rangeFormatting = {
         dynamicRegistration = true,
+        rangesSupport = true,
       },
       completion = {
         dynamicRegistration = false,
         completionItem = {
-          -- Until we can actually expand snippet, move cursor and allow for true snippet experience,
-          -- this should be disabled out of the box.
-          -- However, users can turn this back on if they have a snippet plugin.
-          snippetSupport = false,
+          snippetSupport = true,
           commitCharactersSupport = false,
           preselectSupport = false,
-          deprecatedSupport = false,
+          deprecatedSupport = true,
           documentationFormat = { constants.MarkupKind.Markdown, constants.MarkupKind.PlainText },
+          resolveSupport = {
+            properties = {
+              'additionalTextEdits',
+              'command',
+            },
+          },
+          tagSupport = {
+            valueSet = get_value_set(constants.CompletionTag),
+          },
         },
         completionItemKind = {
           valueSet = get_value_set(constants.CompletionItemKind),
@@ -758,9 +476,7 @@ function protocol.make_client_capabilities()
             'data',
           },
         },
-
-        -- TODO(tjdevries): Implement this
-        contextSupport = false,
+        contextSupport = true,
       },
       declaration = {
         linkSupport = true,
@@ -852,7 +568,7 @@ function protocol.make_client_capabilities()
       workDoneProgress = true,
       showMessage = {
         messageActionItem = {
-          additionalPropertiesSupport = false,
+          additionalPropertiesSupport = true,
         },
       },
       showDocument = {
@@ -905,9 +621,111 @@ function protocol.resolve_capabilities(server_capabilities)
 end
 
 -- Generated by gen_lsp.lua, keep at end of file.
+--- @alias vim.lsp.protocol.Method.ClientToServer
+--- | 'callHierarchy/incomingCalls',
+--- | 'callHierarchy/outgoingCalls',
+--- | 'codeAction/resolve',
+--- | 'codeLens/resolve',
+--- | 'completionItem/resolve',
+--- | 'documentLink/resolve',
+--- | '$/setTrace',
+--- | 'exit',
+--- | 'initialize',
+--- | 'initialized',
+--- | 'inlayHint/resolve',
+--- | 'notebookDocument/didChange',
+--- | 'notebookDocument/didClose',
+--- | 'notebookDocument/didOpen',
+--- | 'notebookDocument/didSave',
+--- | 'shutdown',
+--- | 'textDocument/codeAction',
+--- | 'textDocument/codeLens',
+--- | 'textDocument/colorPresentation',
+--- | 'textDocument/completion',
+--- | 'textDocument/declaration',
+--- | 'textDocument/definition',
+--- | 'textDocument/diagnostic',
+--- | 'textDocument/didChange',
+--- | 'textDocument/didClose',
+--- | 'textDocument/didOpen',
+--- | 'textDocument/didSave',
+--- | 'textDocument/documentColor',
+--- | 'textDocument/documentHighlight',
+--- | 'textDocument/documentLink',
+--- | 'textDocument/documentSymbol',
+--- | 'textDocument/foldingRange',
+--- | 'textDocument/formatting',
+--- | 'textDocument/hover',
+--- | 'textDocument/implementation',
+--- | 'textDocument/inlayHint',
+--- | 'textDocument/inlineCompletion',
+--- | 'textDocument/inlineValue',
+--- | 'textDocument/linkedEditingRange',
+--- | 'textDocument/moniker',
+--- | 'textDocument/onTypeFormatting',
+--- | 'textDocument/prepareCallHierarchy',
+--- | 'textDocument/prepareRename',
+--- | 'textDocument/prepareTypeHierarchy',
+--- | 'textDocument/rangeFormatting',
+--- | 'textDocument/rangesFormatting',
+--- | 'textDocument/references',
+--- | 'textDocument/rename',
+--- | 'textDocument/selectionRange',
+--- | 'textDocument/semanticTokens/full',
+--- | 'textDocument/semanticTokens/full/delta',
+--- | 'textDocument/semanticTokens/range',
+--- | 'textDocument/signatureHelp',
+--- | 'textDocument/typeDefinition',
+--- | 'textDocument/willSave',
+--- | 'textDocument/willSaveWaitUntil',
+--- | 'typeHierarchy/subtypes',
+--- | 'typeHierarchy/supertypes',
+--- | 'window/workDoneProgress/cancel',
+--- | 'workspaceSymbol/resolve',
+--- | 'workspace/diagnostic',
+--- | 'workspace/didChangeConfiguration',
+--- | 'workspace/didChangeWatchedFiles',
+--- | 'workspace/didChangeWorkspaceFolders',
+--- | 'workspace/didCreateFiles',
+--- | 'workspace/didDeleteFiles',
+--- | 'workspace/didRenameFiles',
+--- | 'workspace/executeCommand',
+--- | 'workspace/symbol',
+--- | 'workspace/textDocumentContent',
+--- | 'workspace/willCreateFiles',
+--- | 'workspace/willDeleteFiles',
+--- | 'workspace/willRenameFiles',
+
+--- @alias vim.lsp.protocol.Method.ServerToClient
+--- | 'client/registerCapability',
+--- | 'client/unregisterCapability',
+--- | '$/logTrace',
+--- | 'telemetry/event',
+--- | 'textDocument/publishDiagnostics',
+--- | 'window/logMessage',
+--- | 'window/showDocument',
+--- | 'window/showMessage',
+--- | 'window/showMessageRequest',
+--- | 'window/workDoneProgress/create',
+--- | 'workspace/applyEdit',
+--- | 'workspace/codeLens/refresh',
+--- | 'workspace/configuration',
+--- | 'workspace/diagnostic/refresh',
+--- | 'workspace/foldingRange/refresh',
+--- | 'workspace/inlayHint/refresh',
+--- | 'workspace/inlineValue/refresh',
+--- | 'workspace/semanticTokens/refresh',
+--- | 'workspace/textDocumentContent/refresh',
+--- | 'workspace/workspaceFolders',
+
+--- @alias vim.lsp.protocol.Method
+--- | vim.lsp.protocol.Method.ClientToServer
+--- | vim.lsp.protocol.Method.ServerToClient
+
+-- Generated by gen_lsp.lua, keep at end of file.
+--- @enum vim.lsp.protocol.Methods
+--- @see https://microsoft.github.io/language-server-protocol/specification/#metaModel
 --- LSP method names.
----
----@see https://microsoft.github.io/language-server-protocol/specification/#metaModel
 protocol.Methods = {
   --- A request to resolve the incoming calls for a given `CallHierarchyItem`.
   --- @since 3.16.0
@@ -1170,14 +988,14 @@ protocol.Methods = {
   --- symbol's location.
   --- @since 3.17.0
   workspaceSymbol_resolve = 'workspaceSymbol/resolve',
-  --- A request sent from the server to the client to modify certain resources.
+  --- A request sent from the server to the client to modified certain resources.
   workspace_applyEdit = 'workspace/applyEdit',
   --- A request to refresh all code actions
   --- @since 3.16.0
   workspace_codeLens_refresh = 'workspace/codeLens/refresh',
   --- The 'workspace/configuration' request is sent from the server to the client to fetch a certain
   --- configuration setting.
-  --- This pull model replaces the old push model where the client signaled configuration change via an
+  --- This pull model replaces the old push model were the client signaled configuration change via an
   --- event. If the server still needs to react to configuration changes (since the server caches the
   --- result of `workspace/configuration` requests) the server should register for an empty configuration
   --- change event and empty the cache if such an event is received.
@@ -1210,7 +1028,7 @@ protocol.Methods = {
   --- files were renamed from within the client.
   --- @since 3.16.0
   workspace_didRenameFiles = 'workspace/didRenameFiles',
-  --- A request sent from the client to the server to execute a command. The request might return
+  --- A request send from the client to the server to execute a command. The request might return
   --- a workspace edit which the client will apply to the workspace.
   workspace_executeCommand = 'workspace/executeCommand',
   --- @since 3.18.0
@@ -1230,6 +1048,16 @@ protocol.Methods = {
   ---  need to advertise support for WorkspaceSymbols via the client capability
   ---  `workspace.symbol.resolveSupport`.
   workspace_symbol = 'workspace/symbol',
+  --- The `workspace/textDocumentContent` request is sent from the client to the
+  --- server to request the content of a text document.
+  --- @since 3.18.0
+  --- @proposed
+  workspace_textDocumentContent = 'workspace/textDocumentContent',
+  --- The `workspace/textDocumentContent` request is sent from the server to the client to refresh
+  --- the content of a specific text document.
+  --- @since 3.18.0
+  --- @proposed
+  workspace_textDocumentContent_refresh = 'workspace/textDocumentContent/refresh',
   --- The will create files request is sent from the client to the server before files are actually
   --- created as long as the creation is triggered from within the client.
   --- The request can return a `WorkspaceEdit` which will be applied to workspace before the
@@ -1248,14 +1076,69 @@ protocol.Methods = {
   --- The `workspace/workspaceFolders` is sent from the server to the client to fetch the open workspace folders.
   workspace_workspaceFolders = 'workspace/workspaceFolders',
 }
-local function freeze(t)
-  return setmetatable({}, {
-    __index = t,
-    __newindex = function()
-      error('cannot modify immutable table')
-    end,
-  })
-end
-protocol.Methods = freeze(protocol.Methods)
+
+-- stylua: ignore start
+-- Generated by gen_lsp.lua, keep at end of file.
+--- Maps method names to the required server capability
+protocol._request_name_to_capability = {
+  ['codeAction/resolve'] = { 'codeActionProvider', 'resolveProvider' },
+  ['codeLens/resolve'] = { 'codeLensProvider', 'resolveProvider' },
+  ['completionItem/resolve'] = { 'completionProvider', 'resolveProvider' },
+  ['documentLink/resolve'] = { 'documentLinkProvider', 'resolveProvider' },
+  ['inlayHint/resolve'] = { 'inlayHintProvider', 'resolveProvider' },
+  ['textDocument/codeAction'] = { 'codeActionProvider' },
+  ['textDocument/codeLens'] = { 'codeLensProvider' },
+  ['textDocument/completion'] = { 'completionProvider' },
+  ['textDocument/declaration'] = { 'declarationProvider' },
+  ['textDocument/definition'] = { 'definitionProvider' },
+  ['textDocument/diagnostic'] = { 'diagnosticProvider' },
+  ['textDocument/didChange'] = { 'textDocumentSync' },
+  ['textDocument/didClose'] = { 'textDocumentSync', 'openClose' },
+  ['textDocument/didOpen'] = { 'textDocumentSync', 'openClose' },
+  ['textDocument/didSave'] = { 'textDocumentSync', 'save' },
+  ['textDocument/documentColor'] = { 'colorProvider' },
+  ['textDocument/documentHighlight'] = { 'documentHighlightProvider' },
+  ['textDocument/documentLink'] = { 'documentLinkProvider' },
+  ['textDocument/documentSymbol'] = { 'documentSymbolProvider' },
+  ['textDocument/foldingRange'] = { 'foldingRangeProvider' },
+  ['textDocument/formatting'] = { 'documentFormattingProvider' },
+  ['textDocument/hover'] = { 'hoverProvider' },
+  ['textDocument/implementation'] = { 'implementationProvider' },
+  ['textDocument/inlayHint'] = { 'inlayHintProvider' },
+  ['textDocument/inlineCompletion'] = { 'inlineCompletionProvider' },
+  ['textDocument/inlineValue'] = { 'inlineValueProvider' },
+  ['textDocument/linkedEditingRange'] = { 'linkedEditingRangeProvider' },
+  ['textDocument/moniker'] = { 'monikerProvider' },
+  ['textDocument/onTypeFormatting'] = { 'documentOnTypeFormattingProvider' },
+  ['textDocument/prepareCallHierarchy'] = { 'callHierarchyProvider' },
+  ['textDocument/prepareRename'] = { 'renameProvider', 'prepareProvider' },
+  ['textDocument/prepareTypeHierarchy'] = { 'typeHierarchyProvider' },
+  ['textDocument/rangeFormatting'] = { 'documentRangeFormattingProvider' },
+  ['textDocument/rangesFormatting'] = { 'documentRangeFormattingProvider', 'rangesSupport' },
+  ['textDocument/references'] = { 'referencesProvider' },
+  ['textDocument/rename'] = { 'renameProvider' },
+  ['textDocument/selectionRange'] = { 'selectionRangeProvider' },
+  ['textDocument/semanticTokens/full'] = { 'semanticTokensProvider' },
+  ['textDocument/semanticTokens/full/delta'] = { 'semanticTokensProvider', 'full', 'delta' },
+  ['textDocument/semanticTokens/range'] = { 'semanticTokensProvider', 'range' },
+  ['textDocument/signatureHelp'] = { 'signatureHelpProvider' },
+  ['textDocument/typeDefinition'] = { 'typeDefinitionProvider' },
+  ['textDocument/willSave'] = { 'textDocumentSync', 'willSave' },
+  ['textDocument/willSaveWaitUntil'] = { 'textDocumentSync', 'willSaveWaitUntil' },
+  ['workspaceSymbol/resolve'] = { 'workspaceSymbolProvider', 'resolveProvider' },
+  ['workspace/diagnostic'] = { 'diagnosticProvider', 'workspaceDiagnostics' },
+  ['workspace/didChangeWorkspaceFolders'] = { 'workspace', 'workspaceFolders', 'changeNotifications' },
+  ['workspace/didCreateFiles'] = { 'workspace', 'fileOperations', 'didCreate' },
+  ['workspace/didDeleteFiles'] = { 'workspace', 'fileOperations', 'didDelete' },
+  ['workspace/didRenameFiles'] = { 'workspace', 'fileOperations', 'didRename' },
+  ['workspace/executeCommand'] = { 'executeCommandProvider' },
+  ['workspace/symbol'] = { 'workspaceSymbolProvider' },
+  ['workspace/textDocumentContent'] = { 'workspace', 'textDocumentContent' },
+  ['workspace/willCreateFiles'] = { 'workspace', 'fileOperations', 'willCreate' },
+  ['workspace/willDeleteFiles'] = { 'workspace', 'fileOperations', 'willDelete' },
+  ['workspace/willRenameFiles'] = { 'workspace', 'fileOperations', 'willRename' },
+  ['workspace/workspaceFolders'] = { 'workspace', 'workspaceFolders' },
+}
+-- stylua: ignore end
 
 return protocol

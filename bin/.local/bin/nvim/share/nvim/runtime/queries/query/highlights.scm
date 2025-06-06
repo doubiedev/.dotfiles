@@ -11,8 +11,11 @@
 (named_node
   name: (identifier) @variable)
 
+(missing_node
+  name: (identifier) @variable)
+
 (field_definition
-  name: (identifier) @property)
+  name: (identifier) @variable.member)
 
 (negated_field
   "!" @operator
@@ -33,14 +36,22 @@
   ")"
 ] @punctuation.bracket
 
-":" @punctuation.delimiter
+[
+  ":"
+  "/"
+] @punctuation.delimiter
 
 [
   "@"
   "#"
 ] @punctuation.special
 
-"_" @constant
+(predicate
+  "." @punctuation.special)
+
+"_" @character.special
+
+"MISSING" @keyword
 
 ((parameters
   (identifier) @number)
@@ -62,6 +73,15 @@
 
 ((comment) @keyword.directive @nospell
   (#lua-match? @keyword.directive "^;+%s*format%-ignore%s*$"))
+
+((predicate
+  name: (identifier) @_name
+  parameters: (parameters
+    .
+    (capture)?
+    .
+    (identifier) @property))
+  (#eq? @_name "set"))
 
 ((predicate
   name: (identifier) @_name

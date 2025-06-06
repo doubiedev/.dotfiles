@@ -112,17 +112,6 @@ function vim.rpcrequest(channel, method, ...) end
 --- equal, {a} is greater than {b} or {a} is lesser than {b}, respectively.
 function vim.stricmp(a, b) end
 
---- Convert UTF-32 or UTF-16 {index} to byte index. If {use_utf16} is not
---- supplied, it defaults to false (use UTF-32). Returns the byte index.
----
---- Invalid UTF-8 and NUL is treated like in |vim.str_utfindex()|.
---- An {index} in the middle of a UTF-16 sequence is rounded upwards to
---- the end of that sequence.
---- @param str string
---- @param index integer
---- @param use_utf16? boolean
-function vim.str_byteindex(str, index, use_utf16) end
-
 --- Gets a list of the starting byte positions of each UTF-8 codepoint in the given string.
 ---
 --- Embedded NUL bytes are treated as terminating the string.
@@ -171,19 +160,6 @@ function vim.str_utf_start(str, index) end
 --- @param index integer
 --- @return integer
 function vim.str_utf_end(str, index) end
-
---- Convert byte index to UTF-32 and UTF-16 indices. If {index} is not
---- supplied, the length of the string is used. All indices are zero-based.
----
---- Embedded NUL bytes are treated as terminating the string. Invalid UTF-8
---- bytes, and embedded surrogates are counted as one code point each. An
---- {index} in the middle of a UTF-8 sequence is rounded upwards to the end of
---- that sequence.
---- @param str string
---- @param index? integer
---- @return integer UTF-32 index
---- @return integer UTF-16 index
-function vim.str_utfindex(str, index) end
 
 --- The result is a String, which is the text {str} converted from
 --- encoding {from} to encoding {to}. When the conversion fails `nil` is
@@ -247,15 +223,19 @@ function vim.schedule(fn) end
 ---     - If {callback} errors, the error is raised.
 function vim.wait(time, callback, interval, fast_only) end
 
---- Attach to ui events, similar to |nvim_ui_attach()| but receive events
---- as Lua callback. Can be used to implement screen elements like
---- popupmenu or message handling in Lua.
+--- Subscribe to |ui-events|, similar to |nvim_ui_attach()| but receive events in a Lua callback.
+--- Used to implement screen elements like popupmenu or message handling in Lua.
 ---
---- {options} should be a dictionary-like table, where `ext_...` options should
---- be set to true to receive events for the respective external element.
+--- {options} is a dict with one or more `ext_…` |ui-option|s set to true to enable events for
+--- the respective UI element.
 ---
 --- {callback} receives event name plus additional parameters. See |ui-popupmenu|
 --- and the sections below for event format for respective events.
+---
+--- Callbacks for `msg_show` events are executed in |api-fast| context; showing
+--- the message should be scheduled.
+---
+--- Excessive errors inside the callback will result in forced detachment.
 ---
 --- WARNING: This api is considered experimental.  Usability will vary for
 --- different screen elements. In particular `ext_messages` behavior is subject
@@ -269,17 +249,19 @@ function vim.wait(time, callback, interval, fast_only) end
 --- ns = vim.api.nvim_create_namespace('my_fancy_pum')
 ---
 --- vim.ui_attach(ns, {ext_popupmenu=true}, function(event, ...)
----   if event == "popupmenu_show" then
+---   if event == 'popupmenu_show' then
 ---     local items, selected, row, col, grid = ...
----     print("display pum ", #items)
----   elseif event == "popupmenu_select" then
+---     print('display pum ', #items)
+---   elseif event == 'popupmenu_select' then
 ---     local selected = ...
----     print("selected", selected)
----   elseif event == "popupmenu_hide" then
----     print("FIN")
+---     print('selected', selected)
+---   elseif event == 'popupmenu_hide' then
+---     print('FIN')
 ---   end
 --- end)
 --- ```
+---
+--- @since 0
 ---
 --- @param ns integer
 --- @param options table<string, any>

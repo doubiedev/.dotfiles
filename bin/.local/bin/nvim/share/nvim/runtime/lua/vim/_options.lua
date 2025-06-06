@@ -95,7 +95,6 @@
 local api = vim.api
 
 -- TODO(tjdevries): Improve option metadata so that this doesn't have to be hardcoded.
---                  Can be done in a separate PR.
 local key_value_options = {
   fillchars = true,
   fcs = true,
@@ -175,6 +174,11 @@ local function new_buf_opt_accessor(bufnr)
 end
 
 local function new_win_opt_accessor(winid, bufnr)
+  -- TODO(lewis6991): allow passing both buf and win to nvim_get_option_value
+  if bufnr ~= nil and bufnr ~= 0 then
+    error('only bufnr=0 is supported')
+  end
+
   return setmetatable({}, {
     __index = function(_, k)
       if bufnr == nil and type(k) == 'number' then
@@ -185,11 +189,6 @@ local function new_win_opt_accessor(winid, bufnr)
         end
       end
 
-      if bufnr ~= nil and bufnr ~= 0 then
-        error('only bufnr=0 is supported')
-      end
-
-      -- TODO(lewis6991): allow passing both buf and win to nvim_get_option_value
       return api.nvim_get_option_value(k, {
         scope = bufnr and 'local' or nil,
         win = winid or 0,
@@ -197,7 +196,6 @@ local function new_win_opt_accessor(winid, bufnr)
     end,
 
     __newindex = function(_, k, v)
-      -- TODO(lewis6991): allow passing both buf and win to nvim_set_option_value
       return api.nvim_set_option_value(k, v, {
         scope = bufnr and 'local' or nil,
         win = winid or 0,
@@ -231,10 +229,8 @@ end
 --- global value of a |global-local| option, see |:setglobal|.
 --- </pre>
 
---- Get or set |options|. Like `:set`. Invalid key is an error.
----
---- Note: this works on both buffer-scoped and window-scoped options using the
---- current buffer and window.
+--- Get or set |options|. Works like `:set`, so buffer/window-scoped options target the current
+--- buffer/window. Invalid key is an error.
 ---
 --- Example:
 ---
@@ -276,10 +272,8 @@ vim.go = setmetatable({}, {
 })
 
 --- Get or set buffer-scoped |options| for the buffer with number {bufnr}.
---- If {bufnr} is omitted then the current buffer is used.
+--- Like `:setlocal`. If {bufnr} is omitted then the current buffer is used.
 --- Invalid {bufnr} or key is an error.
----
---- Note: this is equivalent to `:setlocal` for |global-local| options and `:set` otherwise.
 ---
 --- Example:
 ---
@@ -694,6 +688,7 @@ local function remove_value(info, current, new)
 end
 
 local function create_option_accessor(scope)
+  --- @diagnostic disable-next-line: no-unknown
   local option_mt
 
   local function make_option(name, value)
@@ -702,6 +697,7 @@ local function create_option_accessor(scope)
     if type(value) == 'table' and getmetatable(value) == option_mt then
       assert(name == value._name, "must be the same value, otherwise that's weird.")
 
+      --- @diagnostic disable-next-line: no-unknown
       value = value._value
     end
 
@@ -725,6 +721,7 @@ local function create_option_accessor(scope)
     end,
 
     append = function(self, right)
+      --- @diagnostic disable-next-line: no-unknown
       self._value = add_value(self._info, self._value, right)
       self:_set()
     end,
@@ -734,6 +731,7 @@ local function create_option_accessor(scope)
     end,
 
     prepend = function(self, right)
+      --- @diagnostic disable-next-line: no-unknown
       self._value = prepend_value(self._info, self._value, right)
       self:_set()
     end,
@@ -743,6 +741,7 @@ local function create_option_accessor(scope)
     end,
 
     remove = function(self, right)
+      --- @diagnostic disable-next-line: no-unknown
       self._value = remove_value(self._info, self._value, right)
       self:_set()
     end,
@@ -774,7 +773,7 @@ end
 ---
 ---
 --- A special interface |vim.opt| exists for conveniently interacting with list-
---- and map-style option from Lua: It allows accessing them as Lua tables and
+--- and map-style options from Lua: It allows accessing them as Lua tables and
 --- offers object-oriented method for adding and removing entries.
 ---
 ---     Examples: ~
@@ -923,11 +922,11 @@ function Option:prepend(value) end -- luacheck: no unused
 ---@diagnostic disable-next-line:unused-local used for gen_vimdoc
 function Option:remove(value) end -- luacheck: no unused
 
----@private
+--- @nodoc
 vim.opt = create_option_accessor()
 
----@private
+--- @nodoc
 vim.opt_local = create_option_accessor('local')
 
----@private
+--- @nodoc
 vim.opt_global = create_option_accessor('global')

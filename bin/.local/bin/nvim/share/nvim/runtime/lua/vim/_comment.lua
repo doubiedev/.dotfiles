@@ -9,8 +9,8 @@
 local function get_commentstring(ref_position)
   local buf_cs = vim.bo.commentstring
 
-  local has_ts_parser, ts_parser = pcall(vim.treesitter.get_parser)
-  if not has_ts_parser then
+  local ts_parser = vim.treesitter.get_parser(0, '', { error = false })
+  if not ts_parser then
     return buf_cs
   end
 
@@ -18,6 +18,18 @@ local function get_commentstring(ref_position)
   -- This is useful for injected languages (like markdown with code blocks).
   local row, col = ref_position[1] - 1, ref_position[2]
   local ref_range = { row, col, row, col + 1 }
+
+  -- Get 'commentstring' from tree-sitter captures' metadata.
+  -- Traverse backwards to prefer narrower captures.
+  local caps = vim.treesitter.get_captures_at_pos(0, row, col)
+  for i = #caps, 1, -1 do
+    local id, metadata = caps[i].id, caps[i].metadata
+    local md_cms = metadata['bo.commentstring'] or metadata[id] and metadata[id]['bo.commentstring']
+
+    if md_cms then
+      return md_cms
+    end
+  end
 
   -- - Get 'commentstring' from the deepest LanguageTree which both contains
   --   reference range and has valid 'commentstring' (meaning it has at least
@@ -194,14 +206,9 @@ local function toggle_lines(line_start, line_end, ref_position)
   -- - Debatable for highlighting in text area (like LSP semantic tokens).
   --   Mostly because it causes flicker as highlighting is preserved during
   --   comment toggling.
-  package.loaded['vim._comment']._lines = vim.tbl_map(f, lines)
-  local lua_cmd = string.format(
-    'vim.api.nvim_buf_set_lines(0, %d, %d, false, package.loaded["vim._comment"]._lines)',
-    line_start - 1,
-    line_end
-  )
-  vim.cmd.lua({ lua_cmd, mods = { lockmarks = true } })
-  package.loaded['vim._comment']._lines = nil
+  vim._with({ lockmarks = true }, function()
+    vim.api.nvim_buf_set_lines(0, line_start - 1, line_end, false, vim.tbl_map(f, lines))
+  end)
 end
 
 --- Operator which toggles user-supplied range of lines

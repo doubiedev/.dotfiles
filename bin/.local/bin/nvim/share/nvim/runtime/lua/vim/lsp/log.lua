@@ -1,4 +1,25 @@
--- Logger for language client plugin.
+--- @brief
+--- The `vim.lsp.log` module provides logging for the Nvim LSP client.
+---
+--- When debugging language servers, it is helpful to enable extra-verbose logging of the LSP client
+--- RPC events. Example:
+--- ```lua
+--- vim.lsp.set_log_level 'trace'
+--- require('vim.lsp.log').set_format_func(vim.inspect)
+--- ```
+---
+--- Then try to run the language server, and open the log with:
+--- ```vim
+--- :lua vim.cmd('tabnew ' .. vim.lsp.get_log_path())
+--- ```
+---
+--- (Or use `:LspLog` if you have nvim-lspconfig installed.)
+---
+--- Note:
+--- - Remember to DISABLE verbose logging ("debug" or "trace" level), else you may encounter
+---   performance issues.
+--- - "ERROR" messages containing "stderr" only indicate that the log was sent to stderr. Many
+---   servers send harmless messages via stderr.
 
 local log = {}
 
@@ -9,7 +30,7 @@ local log_levels = vim.log.levels
 --- Can be used to lookup the number from the name or the name from the number.
 --- Levels by name: "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "OFF"
 --- Level numbers begin with "TRACE" at 0
---- @type table<string|integer, string|integer>
+--- @type table<string,integer> | table<integer, string>
 --- @nodoc
 log.levels = vim.deepcopy(log_levels)
 
@@ -19,7 +40,7 @@ local current_log_level = log_levels.WARN
 local log_date_format = '%F %H:%M:%S'
 
 local function format_func(arg)
-  return vim.inspect(arg, { newline = '' })
+  return vim.inspect(arg, { newline = ' ', indent = '' })
 end
 
 local function notify(msg, level)
@@ -32,17 +53,22 @@ local function notify(msg, level)
   end
 end
 
-local logfilename = vim.fs.joinpath(vim.fn.stdpath('log'), 'lsp.log')
+local logfilename = vim.fs.joinpath(vim.fn.stdpath('log') --[[@as string]], 'lsp.log')
 
 -- TODO: Ideally the directory should be created in open_logfile(), right
 -- before opening the log file, but open_logfile() can be called from libuv
 -- callbacks, where using fn.mkdir() is not allowed.
-vim.fn.mkdir(vim.fn.stdpath('log'), 'p')
+vim.fn.mkdir(vim.fn.stdpath('log') --[[@as string]], 'p')
 
 --- Returns the log filename.
 ---@return string log filename
 function log.get_filename()
   return logfilename
+end
+
+--- @param s string
+function log._set_filename(s)
+  logfilename = s
 end
 
 --- @type file*?, string?
@@ -82,6 +108,7 @@ end
 
 for level, levelnr in pairs(log_levels) do
   -- Also export the log level on the root object.
+  ---@diagnostic disable-next-line: no-unknown
   log[level] = levelnr
 
   -- Add a reverse lookup.
@@ -93,7 +120,7 @@ end
 --- @return fun(...:any): boolean?
 local function create_logger(level, levelnr)
   return function(...)
-    if levelnr < current_log_level then
+    if not log.should_log(levelnr) then
       return false
     end
     local argc = select('#', ...)
@@ -142,7 +169,7 @@ log.trace = create_logger('TRACE', log_levels.TRACE)
 log.warn = create_logger('WARN', log_levels.WARN)
 
 --- Sets the current log level.
----@param level (string|integer) One of `vim.lsp.log.levels`
+---@param level (string|integer) One of |vim.log.levels|
 function log.set_level(level)
   if type(level) == 'string' then
     current_log_level =
@@ -169,7 +196,7 @@ end
 
 --- Checks whether the level is sufficient for logging.
 ---@param level integer log level
----@return bool : true if would log, false if not
+---@return boolean : true if would log, false if not
 function log.should_log(level)
   return level >= current_log_level
 end

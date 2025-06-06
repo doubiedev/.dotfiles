@@ -44,6 +44,11 @@ local query = require('vim.treesitter.query')
 local language = require('vim.treesitter.language')
 local Range = require('vim.treesitter._range')
 
+local default_parse_timeout_ms = 3
+
+---@type Range2
+local entire_document_range = { 0, math.huge }
+
 ---@alias TSCallbackName
 ---| 'changedtree'
 ---| 'bytes'
@@ -57,6 +62,8 @@ local Range = require('vim.treesitter._range')
 ---| 'on_detach'
 ---| 'on_child_added'
 ---| 'on_child_removed'
+
+---@alias ParserThreadState { timeout: integer? }
 
 --- @type table<TSCallbackNameOn,TSCallbackName>
 local TSCallbackNames = {
@@ -73,11 +80,16 @@ local TSCallbackNames = {
 ---@field package _callbacks_rec table<TSCallbackName,function[]> Callback handlers (recursive)
 ---@field private _children table<string,vim.treesitter.LanguageTree> Injected languages
 ---@field private _injection_query vim.treesitter.Query Queries defining injected languages
----@field private _injections_processed boolean
+---@field private _processed_injection_range Range? Range for which injections have been processed
 ---@field private _opts table Options
 ---@field private _parser TSParser Parser for language
----@field private _has_regions boolean
+---Table of regions for which the tree is currently running an async parse
+---@field private _ranges_being_parsed table<string, boolean>
+---Table of callback queues, keyed by each region for which the callbacks should be run
+---@field private _cb_queues table<string, fun(err?: string, trees?: table<integer, TSTree>)[]>
 ---@field private _regions table<integer, Range6[]>?
+---The total number of regions. Since _regions can have holes, we cannot simply read this value from #_regions.
+---@field private _num_regions integer
 ---List of regions this tree should manage and parse. If nil then regions are
 ---taken from _trees. This is mostly a short-lived cache for included_regions()
 ---@field private _lang string Language name
@@ -85,7 +97,9 @@ local TSCallbackNames = {
 ---@field private _source (integer|string) Buffer or string to parse
 ---@field private _trees table<integer, TSTree> Reference to parsed tree (one for each language).
 ---Each key is the index of region, which is synced with _regions and _valid.
----@field private _valid boolean|table<integer,boolean> If the parsed tree is valid
+---@field private _valid_regions table<integer,true> Set of valid region IDs.
+---@field private _num_valid_regions integer Number of valid regions
+---@field private _is_entirely_valid boolean Whether the entire tree (excluding children) is valid.
 ---@field private _logger? fun(logtype: string, msg: string)
 ---@field private _logfile? file*
 local LanguageTree = {}
@@ -98,9 +112,9 @@ local LanguageTree = {}
 
 LanguageTree.__index = LanguageTree
 
---- @package
+--- @nodoc
 ---
---- |LanguageTree| contains a tree of parsers: the root treesitter parser for {lang} and any
+--- LanguageTree contains a tree of parsers: the root treesitter parser for {lang} and any
 --- "injected" language parsers, which themselves may inject other languages, recursively.
 ---
 ---@param source (integer|string) Buffer or text string to parse
@@ -108,7 +122,7 @@ LanguageTree.__index = LanguageTree
 ---@param opts vim.treesitter.LanguageTree.new.Opts?
 ---@return vim.treesitter.LanguageTree parser object
 function LanguageTree.new(source, lang, opts)
-  language.add(lang)
+  assert(language.add(lang))
   opts = opts or {}
 
   if source == 0 then
@@ -117,7 +131,7 @@ function LanguageTree.new(source, lang, opts)
 
   local injections = opts.injections or {}
 
-  --- @type vim.treesitter.LanguageTree
+  --- @class vim.treesitter.LanguageTree
   local self = {
     _source = source,
     _lang = lang,
@@ -126,10 +140,14 @@ function LanguageTree.new(source, lang, opts)
     _opts = opts,
     _injection_query = injections[lang] and query.parse(lang, injections[lang])
       or query.get(lang, 'injections'),
-    _has_regions = false,
-    _injections_processed = false,
-    _valid = false,
+    _processed_injection_range = nil,
+    _valid_regions = {},
+    _num_valid_regions = 0,
+    _num_regions = 1,
+    _is_entirely_valid = false,
     _parser = vim._create_ts_parser(lang),
+    _ranges_being_parsed = {},
+    _cb_queues = {},
     _callbacks = {},
     _callbacks_rec = {},
   }
@@ -182,7 +200,7 @@ end
 
 ---Measure execution time of a function
 ---@generic R1, R2, R3
----@param f fun(): R1, R2, R2
+---@param f fun(): R1, R2, R3
 ---@return number, R1, R2, R3
 local function tcall(f, ...)
   local start = vim.uv.hrtime()
@@ -190,6 +208,7 @@ local function tcall(f, ...)
   local r = { f(...) }
   --- @type number
   local duration = (vim.uv.hrtime() - start) / 1000000
+  --- @diagnostic disable-next-line: redundant-return-value
   return duration, unpack(r)
 end
 
@@ -231,7 +250,10 @@ end
 --- tree in treesitter. Doesn't clear filesystem cache. Called often, so needs to be fast.
 ---@param reload boolean|nil
 function LanguageTree:invalidate(reload)
-  self._valid = false
+  self._valid_regions = {}
+  self._num_valid_regions = 0
+  self._is_entirely_valid = false
+  self._parser:reset()
 
   -- buffer was reloaded, reparse all trees
   if reload then
@@ -258,53 +280,9 @@ function LanguageTree:trees()
 end
 
 --- Gets the language of this tree node.
+--- @return string
 function LanguageTree:lang()
   return self._lang
-end
-
---- Returns whether this LanguageTree is valid, i.e., |LanguageTree:trees()| reflects the latest
---- state of the source. If invalid, user should call |LanguageTree:parse()|.
----@param exclude_children boolean|nil whether to ignore the validity of children (default `false`)
----@return boolean
-function LanguageTree:is_valid(exclude_children)
-  local valid = self._valid
-
-  if type(valid) == 'table' then
-    for i, _ in pairs(self:included_regions()) do
-      if not valid[i] then
-        return false
-      end
-    end
-  end
-
-  if not exclude_children then
-    if not self._injections_processed then
-      return false
-    end
-
-    for _, child in pairs(self._children) do
-      if not child:is_valid(exclude_children) then
-        return false
-      end
-    end
-  end
-
-  if type(valid) == 'boolean' then
-    return valid
-  end
-
-  self._valid = true
-  return true
-end
-
---- Returns a map of language to child tree.
-function LanguageTree:children()
-  return self._children
-end
-
---- Returns the source content of the language tree (bufnr or string).
-function LanguageTree:source()
-  return self._source
 end
 
 --- @param region Range6[]
@@ -332,44 +310,112 @@ local function intercepts_region(region, range)
   return false
 end
 
+--- Returns whether this LanguageTree is valid, i.e., |LanguageTree:trees()| reflects the latest
+--- state of the source. If invalid, user should call |LanguageTree:parse()|.
+---@param exclude_children boolean? whether to ignore the validity of children (default `false`)
+---@param range Range? range to check for validity
+---@return boolean
+function LanguageTree:is_valid(exclude_children, range)
+  local valid_regions = self._valid_regions
+
+  if not self._is_entirely_valid then
+    if not range then
+      return false
+    end
+    -- TODO: Efficiently search for possibly intersecting regions using a binary search
+    for i, region in pairs(self:included_regions()) do
+      if
+        not valid_regions[i]
+        and (
+          intercepts_region(region, range)
+          or (self._trees[i] and intercepts_region(self._trees[i]:included_ranges(false), range))
+        )
+      then
+        return false
+      end
+    end
+  end
+
+  if not exclude_children then
+    if
+      not self._processed_injection_range
+      or not Range.contains(self._processed_injection_range, range or entire_document_range)
+    then
+      return false
+    end
+
+    for _, child in pairs(self._children) do
+      if not child:is_valid(exclude_children, range) then
+        return false
+      end
+    end
+  end
+
+  return true
+end
+
+--- Returns a map of language to child tree.
+--- @return table<string,vim.treesitter.LanguageTree>
+function LanguageTree:children()
+  return self._children
+end
+
+--- Returns the source content of the language tree (bufnr or string).
+--- @return integer|string
+function LanguageTree:source()
+  return self._source
+end
+
 --- @private
 --- @param range boolean|Range?
+--- @param thread_state ParserThreadState
 --- @return Range6[] changes
 --- @return integer no_regions_parsed
 --- @return number total_parse_time
-function LanguageTree:_parse_regions(range)
+function LanguageTree:_parse_regions(range, thread_state)
   local changes = {}
   local no_regions_parsed = 0
   local total_parse_time = 0
-
-  if type(self._valid) ~= 'table' then
-    self._valid = {}
-  end
 
   -- If there are no ranges, set to an empty list
   -- so the included ranges in the parser are cleared.
   for i, ranges in pairs(self:included_regions()) do
     if
-      not self._valid[i]
+      not self._valid_regions[i]
       and (
         intercepts_region(ranges, range)
         or (self._trees[i] and intercepts_region(self._trees[i]:included_ranges(false), range))
       )
     then
       self._parser:set_included_ranges(ranges)
+      self._parser:set_timeout(thread_state.timeout and thread_state.timeout * 1000 or 0) -- ms -> micros
+
       local parse_time, tree, tree_changes =
         tcall(self._parser.parse, self._parser, self._trees[i], self._source, true)
+      while true do
+        if tree then
+          break
+        end
+        coroutine.yield(self._trees, false)
 
-      -- Pass ranges if this is an initial parse
-      local cb_changes = self._trees[i] and tree_changes or tree:included_ranges(true)
+        parse_time, tree, tree_changes =
+          tcall(self._parser.parse, self._parser, self._trees[i], self._source, true)
+      end
 
-      self:_do_callback('changedtree', cb_changes, tree)
+      self:_subtract_time(thread_state, parse_time)
+
+      self:_do_callback('changedtree', tree_changes, tree)
       self._trees[i] = tree
       vim.list_extend(changes, tree_changes)
 
       total_parse_time = total_parse_time + parse_time
       no_regions_parsed = no_regions_parsed + 1
-      self._valid[i] = true
+      self._valid_regions[i] = true
+      self._num_valid_regions = self._num_valid_regions + 1
+
+      if self._num_valid_regions == self._num_regions then
+        self._is_entirely_valid = true
+      end
     end
   end
 
@@ -377,11 +423,10 @@ function LanguageTree:_parse_regions(range)
 end
 
 --- @private
---- @return number
-function LanguageTree:_add_injections()
+--- @param injections_by_lang table<string, Range6[][]>
+function LanguageTree:_add_injections(injections_by_lang)
   local seen_langs = {} ---@type table<string,boolean>
 
-  local query_time, injections_by_lang = tcall(self._get_injections, self)
   for lang, injection_regions in pairs(injections_by_lang) do
     local has_lang = pcall(language.add, lang)
 
@@ -405,8 +450,98 @@ function LanguageTree:_add_injections()
       self:remove_child(lang)
     end
   end
+end
 
-  return query_time
+--- @param range boolean|Range?
+--- @return string
+local function range_to_string(range)
+  return type(range) == 'table' and table.concat(range, ',') or tostring(range)
+end
+
+--- @private
+--- @param range boolean|Range?
+--- @param callback fun(err?: string, trees?: table<integer, TSTree>)
+function LanguageTree:_push_async_callback(range, callback)
+  local key = range_to_string(range)
+  self._cb_queues[key] = self._cb_queues[key] or {}
+  local queue = self._cb_queues[key]
+  queue[#queue + 1] = callback
+end
+
+--- @private
+--- @param range boolean|Range?
+--- @param err? string
+--- @param trees? table<integer, TSTree>
+function LanguageTree:_run_async_callbacks(range, err, trees)
+  local key = range_to_string(range)
+  for _, cb in ipairs(self._cb_queues[key]) do
+    cb(err, trees)
+  end
+  self._ranges_being_parsed[key] = nil
+  self._cb_queues[key] = nil
+end
+
+--- Run an asynchronous parse, calling {on_parse} when complete.
+---
+--- @private
+--- @param range boolean|Range?
+--- @param on_parse fun(err?: string, trees?: table<integer, TSTree>)
+--- @return table<integer, TSTree>? trees the list of parsed trees, if parsing completed synchronously
+function LanguageTree:_async_parse(range, on_parse)
+  self:_push_async_callback(range, on_parse)
+
+  -- If we are already running an async parse, just queue the callback.
+  local range_string = range_to_string(range)
+  if not self._ranges_being_parsed[range_string] then
+    self._ranges_being_parsed[range_string] = true
+  else
+    return
+  end
+
+  local source = self._source
+  local is_buffer_parser = type(source) == 'number'
+  local buf = is_buffer_parser and vim.b[source] or nil
+  local ct = is_buffer_parser and buf.changedtick or nil
+  local total_parse_time = 0
+  local redrawtime = vim.o.redrawtime
+
+  local thread_state = {} ---@type ParserThreadState
+
+  ---@type fun(): table<integer, TSTree>, boolean
+  local parse = coroutine.wrap(self._parse)
+
+  local function step()
+    if is_buffer_parser then
+      if
+        not vim.api.nvim_buf_is_valid(source --[[@as number]])
+      then
+        return nil
+      end
+
+      -- If buffer was changed in the middle of parsing, reset parse state
+      if buf.changedtick ~= ct then
+        ct = buf.changedtick
+        total_parse_time = 0
+        parse = coroutine.wrap(self._parse)
+      end
+    end
+
+    thread_state.timeout = not vim.g._ts_force_sync_parsing and default_parse_timeout_ms or nil
+    local parse_time, trees, finished = tcall(parse, self, range, thread_state)
+    total_parse_time = total_parse_time + parse_time
+
+    if finished then
+      self:_run_async_callbacks(range, nil, trees)
+      return trees
+    elseif total_parse_time > redrawtime then
+      self:_run_async_callbacks(range, 'TIMEOUT', nil)
+      return nil
+    else
+      vim.schedule(step)
+    end
+  end
+
+  return step()
 end
 
 --- Recursively parse all regions in the language tree using |treesitter-parsers|
@@ -420,11 +555,42 @@ end
 ---     Set to `true` to run a complete parse of the source (Note: Can be slow!)
 ---     Set to `false|nil` to only parse regions with empty ranges (typically
 ---     only the root tree without injections).
---- @return table<integer, TSTree>
-function LanguageTree:parse(range)
-  if self:is_valid() then
+--- @param on_parse fun(err?: string, trees?: table<integer, TSTree>)? Function invoked when parsing completes.
+---     When provided and `vim.g._ts_force_sync_parsing` is not set, parsing will run
+---     asynchronously. The first argument to the function is a string representing the error type,
+---     in case of a failure (currently only possible for timeouts). The second argument is the list
+---     of trees returned by the parse (upon success), or `nil` if the parse timed out (determined
+---     by 'redrawtime').
+---
+---     If parsing was still able to finish synchronously (within 3ms), `parse()` returns the list
+---     of trees. Otherwise, it returns `nil`.
+--- @return table<integer, TSTree>?
+function LanguageTree:parse(range, on_parse)
+  if on_parse then
+    return self:_async_parse(range, on_parse)
+  end
+  local trees, _ = self:_parse(range, {})
+  return trees
+end
+
+---@param thread_state ParserThreadState
+---@param time integer
+function LanguageTree:_subtract_time(thread_state, time)
+  thread_state.timeout = thread_state.timeout and math.max(thread_state.timeout - time, 0)
+  if thread_state.timeout == 0 then
+    coroutine.yield(self._trees, false)
+  end
+end
+
+--- @private
+--- @param range boolean|Range|nil
+--- @param thread_state ParserThreadState
+--- @return table<integer, TSTree> trees
+--- @return boolean finished
+function LanguageTree:_parse(range, thread_state)
+  if self:is_valid(nil, type(range) == 'table' and range or nil) then
     self:_log('valid')
-    return self._trees
+    return self._trees, true
   end
 
   local changes --- @type Range6[]?
@@ -435,17 +601,28 @@ function LanguageTree:parse(range)
   local total_parse_time = 0
 
   -- At least 1 region is invalid
-  if not self:is_valid(true) then
-    changes, no_regions_parsed, total_parse_time = self:_parse_regions(range)
+  if not self:is_valid(true, type(range) == 'table' and range or nil) then
+    changes, no_regions_parsed, total_parse_time = self:_parse_regions(range, thread_state)
+
     -- Need to run injections when we parsed something
     if no_regions_parsed > 0 then
-      self._injections_processed = false
+      self._processed_injection_range = nil
     end
   end
 
-  if not self._injections_processed and range ~= false and range ~= nil then
-    query_time = self:_add_injections()
-    self._injections_processed = true
+  if
+    range
+    and not (
+      self._processed_injection_range
+      and Range.contains(
+        self._processed_injection_range,
+        range ~= true and range or entire_document_range
+      )
+    )
+  then
+    local injections_by_lang = self:_get_injections(range, thread_state)
+    local time = tcall(self._add_injections, self, injections_by_lang)
+    self:_subtract_time(thread_state, time)
   end
 
   self:_log({
@@ -457,28 +634,10 @@ function LanguageTree:parse(range)
   })
 
   for _, child in pairs(self._children) do
-    child:parse(range)
+    child:_parse(range, thread_state)
   end
 
-  return self._trees
-end
-
----@deprecated Misleading name. Use `LanguageTree:children()` (non-recursive) instead,
----            add recursion yourself if needed.
---- Invokes the callback for each |LanguageTree| and its children recursively
----
----@param fn fun(tree: vim.treesitter.LanguageTree, lang: string)
----@param include_self? boolean Whether to include the invoking tree in the results
-function LanguageTree:for_each_child(fn, include_self)
-  vim.deprecate('LanguageTree:for_each_child()', 'LanguageTree:children()', '0.11')
-  if include_self then
-    fn(self, self._lang)
-  end
-
-  for _, child in pairs(self._children) do
-    --- @diagnostic disable-next-line:deprecated
-    child:for_each_child(fn, true)
-  end
+  return self._trees, true
 end
 
 --- Invokes the callback for each |LanguageTree| recursively.
@@ -522,7 +681,8 @@ function LanguageTree:add_child(lang)
   return self._children[lang]
 end
 
---- @package
+---Returns the parent tree. `nil` for the root tree.
+---@return vim.treesitter.LanguageTree?
 function LanguageTree:parent()
   return self._parent
 end
@@ -569,38 +729,35 @@ end
 ---region is valid or not.
 ---@param fn fun(index: integer, region: Range6[]): boolean
 function LanguageTree:_iter_regions(fn)
-  if not self._valid then
+  if vim.deep_equal(self._valid_regions, {}) then
     return
   end
 
-  local was_valid = type(self._valid) ~= 'table'
-
-  if was_valid then
-    self:_log('was valid', self._valid)
-    self._valid = {}
+  if self._is_entirely_valid then
+    self:_log('was valid')
   end
 
   local all_valid = true
 
   for i, region in pairs(self:included_regions()) do
-    if was_valid or self._valid[i] then
-      self._valid[i] = fn(i, region)
-      if not self._valid[i] then
+    if self._valid_regions[i] then
+      -- Setting this to nil rather than false allows us to determine if all regions were parsed
+      -- just by checking the length of _valid_regions.
+      self._valid_regions[i] = fn(i, region) and true or nil
+      if not self._valid_regions[i] then
+        self._num_valid_regions = self._num_valid_regions - 1
         self:_log(function()
           return 'invalidating region', i, region_tostr(region)
         end)
       end
     end
 
-    if not self._valid[i] then
+    if not self._valid_regions[i] then
       all_valid = false
     end
   end
 
-  -- Compress the valid value to 'true' if there are no invalid regions
-  if all_valid then
-    self._valid = all_valid
-  end
+  self._is_entirely_valid = all_valid
 end
 
 --- Sets the included regions that should be parsed by this |LanguageTree|.
@@ -620,14 +777,13 @@ end
 ---@private
 ---@param new_regions (Range4|Range6|TSNode)[][] List of regions this tree should manage and parse.
 function LanguageTree:set_included_regions(new_regions)
-  self._has_regions = true
-
   -- Transform the tables from 4 element long to 6 element long (with byte offset)
   for _, region in ipairs(new_regions) do
     for i, range in ipairs(region) do
       if type(range) == 'table' and #range == 4 then
         region[i] = Range.add_bytes(self._source, range --[[@as Range4]])
       elseif type(range) == 'userdata' then
+        --- @diagnostic disable-next-line: missing-fields LuaLS varargs bug
         region[i] = { range:range(true) }
       end
     end
@@ -651,29 +807,22 @@ function LanguageTree:set_included_regions(new_regions)
   end
 
   self._regions = new_regions
+  self._num_regions = #new_regions
 end
 
 ---Gets the set of included regions managed by this LanguageTree. This can be different from the
 ---regions set by injection query, because a partial |LanguageTree:parse()| drops the regions
 ---outside the requested range.
+---Each list represents a range in the form of
+---{ {start_row}, {start_col}, {start_bytes}, {end_row}, {end_col}, {end_bytes} }.
 ---@return table<integer, Range6[]>
 function LanguageTree:included_regions()
   if self._regions then
     return self._regions
   end
 
-  if not self._has_regions then
-    -- treesitter.c will default empty ranges to { -1, -1, -1, -1, -1, -1} (the full range)
-    return { {} }
-  end
-
-  local regions = {} ---@type Range6[][]
-  for i, _ in pairs(self._trees) do
-    regions[i] = self._trees[i]:included_ranges(true)
-  end
-
-  self._regions = regions
-  return regions
+  -- treesitter.c will default empty ranges to { -1, -1, -1, -1, -1, -1} (the full range)
+  return { {} }
 end
 
 ---@param node TSNode
@@ -750,7 +899,7 @@ local function add_injection(t, tree_index, pattern, lang, combined, ranges)
   table.insert(t[tree_index][lang][pattern].regions, ranges)
 end
 
--- TODO(clason): replace by refactored `ts.has_parser` API (without registering)
+-- TODO(clason): replace by refactored `ts.has_parser` API (without side effects)
 --- The result of this function is cached to prevent nvim_get_runtime_file from being
 --- called too often
 --- @param lang string parser name
@@ -835,27 +984,32 @@ end
 --- TODO: Allow for an offset predicate to tailor the injection range
 ---       instead of using the entire nodes range.
 --- @private
+--- @param range Range|true
+--- @param thread_state ParserThreadState
 --- @return table<string, Range6[][]>
-function LanguageTree:_get_injections()
-  if not self._injection_query then
+function LanguageTree:_get_injections(range, thread_state)
+  if not self._injection_query or #self._injection_query.captures == 0 then
+    self._processed_injection_range = entire_document_range
     return {}
   end
 
   ---@type table<integer,vim.treesitter.languagetree.Injection>
   local injections = {}
+  local start = vim.uv.hrtime()
+
+  local full_scan = range == true or self._injection_query.has_combined_injections
 
   for index, tree in pairs(self._trees) do
     local root_node = tree:root()
-    local start_line, _, end_line, _ = root_node:range()
+    local start_line, end_line ---@type integer, integer
+    if full_scan then
+      start_line, _, end_line = root_node:range()
+    else
+      start_line, _, end_line = Range.unpack4(range --[[@as Range]])
+    end
 
     for pattern, match, metadata in
-      self._injection_query:iter_matches(
-        root_node,
-        self._source,
-        start_line,
-        end_line + 1,
-        { all = true }
-      )
+      self._injection_query:iter_matches(root_node, self._source, start_line, end_line + 1)
     do
       local lang, combined, ranges = self:_get_injection(match, metadata)
       if lang then
@@ -863,6 +1017,11 @@ function LanguageTree:_get_injections()
       else
         self:_log('match from injection query failed for pattern', pattern)
       end
+
+      -- Check the current function duration against the timeout, if it exists.
+      local current_time = vim.uv.hrtime()
+      self:_subtract_time(thread_state, (current_time - start) / 1000000)
+      start = current_time
     end
   end
 
@@ -887,6 +1046,12 @@ function LanguageTree:_get_injections()
         end
       end
     end
+  end
+
+  if full_scan then
+    self._processed_injection_range = entire_document_range
+  else
+    self._processed_injection_range = range --[[@as Range]]
   end
 
   return result
@@ -929,7 +1094,15 @@ function LanguageTree:_edit(
     )
   end
 
-  self._regions = nil
+  self._parser:reset()
+
+  if self._regions then
+    local regions = {} ---@type table<integer, Range6[]>
+    for i, tree in pairs(self._trees) do
+      regions[i] = tree:included_ranges(true)
+    end
+    self._regions = regions
+  end
 
   local changed_range = {
     start_row,
@@ -969,7 +1142,7 @@ function LanguageTree:_edit(
   end
 end
 
----@package
+---@nodoc
 ---@param bufnr integer
 ---@param changed_tick integer
 ---@param start_row integer
@@ -1041,12 +1214,12 @@ function LanguageTree:_on_bytes(
   )
 end
 
----@package
+---@nodoc
 function LanguageTree:_on_reload()
   self:invalidate(true)
 end
 
----@package
+---@nodoc
 function LanguageTree:_on_detach(...)
   self:invalidate(true)
   self:_do_callback('detach', ...)
@@ -1059,7 +1232,7 @@ end
 
 --- Registers callbacks for the [LanguageTree].
 ---@param cbs table<TSCallbackNameOn,function> An [nvim_buf_attach()]-like table argument with the following handlers:
----           - `on_bytes` : see [nvim_buf_attach()], but this will be called _after_ the parsers callback.
+---           - `on_bytes` : see [nvim_buf_attach()].
 ---           - `on_changedtree` : a callback that will be called every time the tree has syntactical changes.
 ---              It will be passed two arguments: a table of the ranges (as node ranges) that
 ---              changed and the changed tree.
@@ -1095,17 +1268,18 @@ end
 local function tree_contains(tree, range)
   local tree_ranges = tree:included_ranges(false)
 
-  return Range.contains({
-    tree_ranges[1][1],
-    tree_ranges[1][2],
-    tree_ranges[#tree_ranges][3],
-    tree_ranges[#tree_ranges][4],
-  }, range)
+  for _, tree_range in ipairs(tree_ranges) do
+    if Range.contains(tree_range, range) then
+      return true
+    end
+  end
+
+  return false
 end
 
 --- Determines whether {range} is contained in the |LanguageTree|.
 ---
----@param range Range4 `{ start_line, start_col, end_line, end_col }`
+---@param range Range4
 ---@return boolean
 function LanguageTree:contains(range)
   for _, tree in pairs(self._trees) do
@@ -1126,7 +1300,7 @@ end
 
 --- Gets the tree that contains {range}.
 ---
----@param range Range4 `{ start_line, start_col, end_line, end_col }`
+---@param range Range4
 ---@param opts? vim.treesitter.LanguageTree.tree_for_range.Opts
 ---@return TSTree?
 function LanguageTree:tree_for_range(range, opts)
@@ -1151,9 +1325,21 @@ function LanguageTree:tree_for_range(range, opts)
   return nil
 end
 
+--- Gets the smallest node that contains {range}.
+---
+---@param range Range4
+---@param opts? vim.treesitter.LanguageTree.tree_for_range.Opts
+---@return TSNode?
+function LanguageTree:node_for_range(range, opts)
+  local tree = self:tree_for_range(range, opts)
+  if tree then
+    return tree:root():descendant_for_range(unpack(range))
+  end
+end
+
 --- Gets the smallest named node that contains {range}.
 ---
----@param range Range4 `{ start_line, start_col, end_line, end_col }`
+---@param range Range4
 ---@param opts? vim.treesitter.LanguageTree.tree_for_range.Opts
 ---@return TSNode?
 function LanguageTree:named_node_for_range(range, opts)
@@ -1165,7 +1351,7 @@ end
 
 --- Gets the appropriate language that contains {range}.
 ---
----@param range Range4 `{ start_line, start_col, end_line, end_col }`
+---@param range Range4
 ---@return vim.treesitter.LanguageTree tree Managing {range}
 function LanguageTree:language_for_range(range)
   for _, child in pairs(self._children) do

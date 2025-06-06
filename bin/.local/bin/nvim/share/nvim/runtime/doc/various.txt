@@ -28,8 +28,8 @@ CTRL-L			Clears and redraws the screen.  The redraw may happen
 :redr[aw][!]		Redraws pending screen updates now, or the entire
 			screen if "!" is included.  To CLEAR the screen use
 			|:mode| or |CTRL-L|.
-			Useful to update the screen during a script or
-			function (or a mapping if 'lazyredraw' set).
+			It can be used to redraw the screen in a script
+			or function (or a mapping if |'lazyredraw'| is set).
 			See also |nvim__redraw()|.
 
 						*:redraws* *:redrawstatus*
@@ -78,9 +78,8 @@ ga			Print the ascii value of the character under the
 			If the character can be inserted as a digraph, also
 			output the two characters that can be used to create
 			the character:
-			    <ö> 246, Hex 00f6, Oct 366, Digr o: ~
+				<ö> 246, Hex 00f6, Oct 366, Digr o: ~
 			This shows you can type CTRL-K o : to insert ö.
-
 
 							*g8*
 g8			Print the hex values of the bytes used in the
@@ -104,11 +103,11 @@ g8			Print the hex values of the bytes used in the
 							*gx*
 gx			Opens the current filepath or URL (decided by
 			|<cfile>|, 'isfname') at cursor using the system
-			default handler, by calling |vim.ui.open()|.
+			default handler. Mapped to |vim.ui.open()|.
 
 							*v_gx*
 {Visual}gx		Opens the selected text using the system default
-			handler, by calling |vim.ui.open()|.
+			handler. Mapped to |vim.ui.open()|.
 
 						*:p* *:pr* *:print* *E749*
 :[range]p[rint] [flags]
@@ -140,12 +139,18 @@ gx			Opens the current filepath or URL (decided by
 :[range]# [count] [flags]
 			synonym for :number.
 
-							*:#!*
+							*:#!* *vim-shebang*
 :#!{anything}		Ignored, so that you can start a Vim script with: >
 				#!vim -S
-				echo "this is a Vim script"
-				quit
+				let mylogbook='$HOME/logbook.md'
+				exe $':e {mylogbook}'
+				$
+				put ='## ' .. strftime('%d. %b %Y')
+				norm! o
 <
+			Make that script executable and run it to create a
+			new diary entry.
+
 							*:z* *E144*
 :[range]z[+-^.=][count]	Display several lines of text surrounding the line
 			specified with [range], or around the current line
@@ -262,6 +267,7 @@ gx			Opens the current filepath or URL (decided by
 <
 							*:!cmd* *:!*
 :!{cmd}			Execute {cmd} with 'shell'. See also |:terminal|.
+			For the filter command, see |:range!|.
 
 			The command runs in a non-interactive shell connected
 			to a pipe (not a terminal). Use |:terminal| to run an
@@ -276,6 +282,16 @@ gx			Opens the current filepath or URL (decided by
 			requires using the call operator (&). >
 				:!Write-Output "1`n2" | & "C:\Windows\System32\sort.exe" /r
 <
+			Vim builds command line using options 'shell', 'shcf',
+			'sxq' and 'shq' in the following order:
+			`&sh &shcf &sxq &shq {cmd} &shq &sxq`
+			So setting both 'sxq' and 'shq' is possible but rarely
+			useful.  Additional escaping inside `{cmd}` may also
+			be due to 'sxe' option.
+
+			Also, all |cmdline-special| characters in {cmd} are
+			replaced by Vim before passing them to shell.
+
 							*E34*
 			Any "!" in {cmd} is replaced with the previous
 			external command (see also 'cpoptions'), unless
@@ -400,6 +416,7 @@ gx			Opens the current filepath or URL (decided by
 			   |:command|    - filter by command name
 			   |:files|      - filter by file name
 			   |:highlight|  - filter by highlight group
+			   |:history|    - filter by history commands
 			   |:jumps|      - filter by file name
 			   |:let|        - filter by variable name
 			   |:list|       - filter whole line
@@ -517,7 +534,8 @@ gO			Show a filetype-specific, navigable "outline" of the
 			current buffer. For example, in a |help| buffer this
 			shows the table of contents.
 
-			Currently works in |help| and |:Man| buffers.
+			Works in |help| and |:Man| buffers, or any buffer with
+			an active |LSP| client (|lsp-defaults|).
 
 [N]gs							*gs* *:sl* *:sleep*
 :[N]sl[eep] [N][m]	Do nothing for [N] seconds, or [N] milliseconds if [m]
@@ -534,17 +552,21 @@ gO			Show a filetype-specific, navigable "outline" of the
 			Queued messages are processed during the sleep.
 
 							*:sl!* *:sleep!*
-:[N]sl[eep]! [N][m]	Same as above. Unlike Vim, it does not hide the
-			cursor. |vim-differences|
+:[N]sl[eep]! [N][m]	Same as above, but hide the cursor.
+
+							*g==*
+g==			Executes the current code block.
+
+			Works in |help| buffers.
 
 ==============================================================================
 2. Using Vim like less or more					*less*
 
 If you use the less or more program to view a file, you don't get syntax
 highlighting.  Thus you would like to use Vim instead.  You can do this by
-using the shell script "$VIMRUNTIME/macros/less.sh".
+using the shell script "$VIMRUNTIME/scripts/less.sh".
 
-This shell script uses the Vim script "$VIMRUNTIME/macros/less.vim".  It sets
+This shell script uses the Vim script "$VIMRUNTIME/scripts/less.vim".  It sets
 up mappings to simulate the commands that less supports.  Otherwise, you can
 still use the Vim commands.
 
@@ -588,6 +610,8 @@ If the filetype of the buffer is associated with a language for which a
 to look up the value of 'commentstring' corresponding to the cursor position.
 (This can be different from the buffer's 'commentstring' in case of
 |treesitter-language-injections|.)
+
+The following |default-mappings| are defined:
 
 							*gc* *gc-default*
 gc{motion}		Comment or uncomment lines covered by {motion}.

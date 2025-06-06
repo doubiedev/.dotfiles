@@ -151,7 +151,7 @@ function properties.trim_trailing_whitespace(bufnr, val)
   )
   if val == 'true' then
     vim.api.nvim_create_autocmd('BufWritePre', {
-      group = 'editorconfig',
+      group = 'nvim.editorconfig',
       buffer = bufnr,
       callback = function()
         local view = vim.fn.winsaveview()
@@ -163,7 +163,7 @@ function properties.trim_trailing_whitespace(bufnr, val)
   else
     vim.api.nvim_clear_autocmds({
       event = 'BufWritePre',
-      group = 'editorconfig',
+      group = 'nvim.editorconfig',
       buffer = bufnr,
     })
   end
@@ -180,13 +180,34 @@ function properties.insert_final_newline(bufnr, val)
   local endofline = val == 'true'
   if vim.bo[bufnr].endofline ~= endofline then
     vim.api.nvim_create_autocmd('BufWritePre', {
-      group = 'editorconfig',
+      group = 'nvim.editorconfig',
       buffer = bufnr,
       once = true,
       callback = function()
         vim.bo[bufnr].endofline = endofline
       end,
     })
+  end
+end
+
+--- A code of the format ss or ss-TT, where ss is an ISO 639 language code and TT is an ISO 3166 territory identifier.
+--- Sets the 'spelllang' option.
+function properties.spelling_language(bufnr, val)
+  local error_msg =
+    'spelling_language must be of the format ss or ss-TT, where ss is an ISO 639 language code and TT is an ISO 3166 territory identifier.'
+
+  assert(val:len() == 2 or val:len() == 5, error_msg)
+
+  local language_code = val:sub(1, 2):lower()
+  assert(language_code:match('%l%l'), error_msg)
+  if val:len() == 2 then
+    vim.bo[bufnr].spelllang = language_code
+  else
+    assert(val:sub(3, 3) == '-', error_msg)
+
+    local territory_code = val:sub(4, 5):lower()
+    assert(territory_code:match('%l%l'), error_msg)
+    vim.bo[bufnr].spelllang = language_code .. '_' .. territory_code
   end
 end
 

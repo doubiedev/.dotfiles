@@ -189,7 +189,7 @@ Other hints:
 
 - The python `neovim` module was renamed to `pynvim` (long ago).
 - If you're using pyenv or virtualenv for the `pynvim` module
-    https://pypi.python.org/pypi/pynvim/, you must set `g:python3_host_prog` to
+    https://pypi.org/project/pynvim/, you must set `g:python3_host_prog` to
     the virtualenv's interpreter path.
 - Read |provider-python|.
 - Be sure you have the latest version of the `pynvim` Python module: >bash
@@ -205,17 +205,11 @@ Other hints:
 
 :CHECKHEALTH REPORTS E5009: INVALID $VIMRUNTIME ~
 
-This means `health#check()` couldn't load, which suggests that |$VIMRUNTIME|
-or 'runtimepath' is broken.
+This means |$VIMRUNTIME| or 'runtimepath' is broken.
 
 - |$VIMRUNTIME| must point to Nvim's runtime files, not Vim's.
 - The |$VIMRUNTIME| directory contents should be readable by the current user.
 - Verify that `:echo &runtimepath` contains the $VIMRUNTIME path.
-- Check the output of: >vim
-
-    :call health#check()
-    :verbose func health#check
-<
 
 NEOVIM CAN'T FIND ITS RUNTIME ~
 

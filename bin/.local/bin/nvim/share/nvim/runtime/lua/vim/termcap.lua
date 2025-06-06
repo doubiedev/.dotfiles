@@ -17,10 +17,8 @@ local M = {}
 ---           otherwise. {seq} is the control sequence for the capability if found, or nil for
 ---           boolean capabilities.
 function M.query(caps, cb)
-  vim.validate({
-    caps = { caps, { 'string', 'table' } },
-    cb = { cb, 'f' },
-  })
+  vim.validate('caps', caps, { 'string', 'table' })
+  vim.validate('cb', cb, 'function')
 
   if type(caps) ~= 'table' then
     caps = { caps }
@@ -36,11 +34,11 @@ function M.query(caps, cb)
   local id = vim.api.nvim_create_autocmd('TermResponse', {
     nested = true,
     callback = function(args)
-      local resp = args.data ---@type string
+      local resp = args.data.sequence ---@type string
       local k, rest = resp:match('^\027P1%+r(%x+)(.*)$')
       if k and rest then
         local cap = vim.text.hexdecode(k)
-        if not pending[cap] then
+        if not cap or not pending[cap] then
           -- Received a response for a capability we didn't request. This can happen if there are
           -- multiple concurrent XTGETTCAP requests
           return
@@ -72,11 +70,6 @@ function M.query(caps, cb)
   end
 
   local query = string.format('\027P+q%s\027\\', table.concat(encoded, ';'))
-
-  -- If running in tmux, wrap with the passthrough sequence
-  if os.getenv('TMUX') then
-    query = string.format('\027Ptmux;%s\027\\', query:gsub('\027', '\027\027'))
-  end
 
   io.stdout:write(query)
 

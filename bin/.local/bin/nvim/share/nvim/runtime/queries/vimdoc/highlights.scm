@@ -1,9 +1,9 @@
 (h1
-  (delimiter) @markup.heading.1
+  (delimiter) @markup.heading.1.delimiter
   (heading) @markup.heading.1)
 
 (h2
-  (delimiter) @markup.heading.2
+  (delimiter) @markup.heading.2.delimiter
   (heading) @markup.heading.2)
 
 (h3
@@ -41,7 +41,7 @@
   text: (_) @markup.raw)
 
 ((codeblock) @markup.raw.block
-  (#set! "priority" 90))
+  (#set! priority 90))
 
 (codeblock
   ">" @markup.raw
@@ -59,7 +59,8 @@
 
 (keycode) @string.special
 
-(url) @string.special.url
+((url) @string.special.url
+  (#set! @string.special.url url @string.special.url))
 
 (modeline) @keyword.directive
 
