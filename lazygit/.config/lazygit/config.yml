@@ -1,18 +1,16 @@
 # Disable welcome popup
 disableStartupPopups: true
-
 # Config relating to things outside of Lazygit like how files are opened, copying to clipboard, etc
 os:
   # A built-in preset that sets all of the above settings. Supported presets
   # are defined in the getPreset function in editor_presets.go.
   editPreset: "nvim"
-
 customCommands:
   - key: 'U'
     command: 'git submodule update --init --recursive'
     context: 'files'
     description: 'Update submodules'
-    stream: true
+    output: log
   - key: 'u'
     command: 'git submodule update -- {{.SelectedFile.Name}}'
     context: 'files'
