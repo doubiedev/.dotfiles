@@ -391,7 +391,7 @@ require("plugins.which-key").setup()
 require("plugins.todo-comments").setup()
 -- require("plugins.ts-autotag").setup()
 require("plugins.render-markdown").setup()
-require("plugins.obsidian").setup()
+-- require("plugins.obsidian").setup()
 require("plugins.oil").setup()
 
 require("mini.icons").setup()
