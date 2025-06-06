@@ -1,1 +1,3 @@
 **/lazy-lock.json
+bin/.local/share/nvim
+bin/.local/state
