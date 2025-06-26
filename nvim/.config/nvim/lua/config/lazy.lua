@@ -393,6 +393,7 @@ require("plugins.todo-comments").setup()
 require("plugins.render-markdown").setup()
 require("plugins.obsidian").setup()
 require("plugins.oil").setup()
+require("plugins.floaterminal").setup()
 
 require("mini.icons").setup()
 require("mini.surround").setup()
