@@ -99,8 +99,8 @@ vim.opt.undofile = true
 
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
+vim.opt.ignorecase = true
 vim.opt.smartcase = true
-vim.opt.ignorecase = false
 
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
@@ -169,7 +169,7 @@ require("lazy").setup({
         {
             'nvim-telescope/telescope.nvim',
             version = '0.1.8',
-            dependencies = { 'nvim-lua/plenary.nvim' }
+            dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-live-grep-args.nvim' }
         },
         {
             'rose-pine/neovim',
@@ -393,6 +393,7 @@ require("plugins.todo-comments").setup()
 require("plugins.render-markdown").setup()
 -- require("plugins.obsidian").setup()
 require("plugins.oil").setup()
+require("plugins.floaterminal").setup()
 
 require("mini.icons").setup()
 require("mini.surround").setup()
