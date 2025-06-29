@@ -320,6 +320,9 @@ exec syncthing -no-browser
 # Nitrogen - Wallpapers
 exec --no-startup-id nitrogen --restore
 
+# Pasytray Audio
+exec --no-startup-id volumeicon
+
 # ------------------------------------------
 # THEME
 # ------------------------------------------
