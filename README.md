@@ -17,3 +17,4 @@ Requires:
     - vlc
     - redshift
     - obsidian
+    - pasystray
