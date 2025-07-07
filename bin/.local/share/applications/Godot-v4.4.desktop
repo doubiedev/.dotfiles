@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Godot 4.4
+Comment=Godot game engine v4.4
+Exec=/home/nd/Applications/godot
+Icon=/home/nd/Applications/godot-icon-128.png
+Terminal=false
+Type=Application
+Categories=Development;

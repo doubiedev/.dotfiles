@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Categories=Network;WebBrowser;
+Exec=/home/nd/Applications/zen/zen %u
+Name=Zen Browser
+Comment=Zen Browser
+Icon=/home/nd/Applications/zen/browser/chrome/icons/default/default128.png
+Terminal=false

@@ -1,0 +1,21 @@
+[Desktop Entry]
+Name=Obsidian
+Exec=/home/nd/Applications/Obsidian-1.6.7_fbe5be623488d0ecebb94f3b174ba197.AppImage --no-sandbox %U
+Terminal=false
+Type=Application
+Icon=appimagekit_191717a2802a69e4cff8e45bb49bb018_obsidian
+StartupWMClass=obsidian
+X-AppImage-Version=1.6.7
+Comment=Obsidian
+MimeType=x-scheme-handler/obsidian;
+Categories=Office;
+TryExec=/home/nd/Applications/Obsidian-1.6.7_fbe5be623488d0ecebb94f3b174ba197.AppImage
+X-AppImage-Old-Icon=obsidian
+X-AppImage-Identifier=191717a2802a69e4cff8e45bb49bb018
+Actions=Remove;
+X-AppImageLauncher-Version=2.2.0 (git commit 0f91801), built on 2022-11-02 23:51:55 UTC
+
+[Desktop Action Remove]
+Name=Remove AppImage from system
+Icon=AppImageLauncher
+Exec=/usr/lib/x86_64-linux-gnu/appimagelauncher/remove "/home/nd/Applications/Obsidian-1.6.7_fbe5be623488d0ecebb94f3b174ba197.AppImage"
