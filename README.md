@@ -18,3 +18,6 @@ Requires:
     - redshift
     - obsidian
     - pasystray
+- tmux tpm
+    - git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+- lazygit
