@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Categories=Network;Development;
+Exec=/home/nd/Applications/Postman/Postman %u
+Name=Postman
+Icon=/home/nd/Applications/Postman/app/icons/icon_128x128.png
+Terminal=false

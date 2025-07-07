@@ -288,8 +288,9 @@ bindsym $mod+Shift+d exec --no-startup-id rofi -show run
 bindsym $mod+Shift+s exec --no-startup-id rofi -show ssh
 
 # Browser
-bindsym $mod+b exec brave-browser
-bindsym $mod+Shift+b exec brave-browser --incognito
+bindsym $mod+b exec ~/Applications/zen/zen
+bindsym $mod+Shift+b exec brave-browser
+# bindsym $mod+Shift+b exec brave-browser --incognito
 
 # File Explorer (Nautilus)
 bindsym $mod+f exec nautilus
