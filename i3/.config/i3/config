@@ -105,6 +105,7 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
+set $ws0 notes
 set $ws1 "1"
 set $ws2 "2"
 set $ws3 "3"
@@ -117,6 +118,7 @@ set $ws9 "9"
 set $ws10 "10"
 
 # switch to workspace
+bindsym $mod+grave workspace $ws0
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2
 bindsym $mod+3 workspace number $ws3
@@ -129,6 +131,7 @@ bindsym $mod+9 workspace number $ws9
 bindsym $mod+0 workspace number $ws10
 
 # move focused container to workspace
+bindsym $mod+Shift+grave move container to workspace $ws0
 bindsym $mod+Shift+1 move container to workspace number $ws1
 bindsym $mod+Shift+2 move container to workspace number $ws2
 bindsym $mod+Shift+3 move container to workspace number $ws3
@@ -186,7 +189,7 @@ workspace_auto_back_and_forth no
 # WORKSPACE RULES
 # ------------------------------------------
 
-assign [class="obsidian"] 8
+assign [class="obsidian"] notes
 assign [class="Todoist"] 9
 assign [class="mpv"] 10
 
