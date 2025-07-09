@@ -210,8 +210,8 @@ for_window [class="Gnome-calculator"] floating enable
 for_window [title="Picture-in-Picture"] floating enable
 for_window [title="Bitwarden"] floating enable
 
-for_window [class="steam"] move to workspace $ws_steam
-for_window [instance="^steam_app_.*"] move to workspace $ws_games, floating enable
+#for_window [class="steam"] move to workspace $ws_steam
+#for_window [instance="^steam_app_.*"] move to workspace $ws_games, floating enable
 
 # ------------------------------------------
 # CUSTOM KEYS
