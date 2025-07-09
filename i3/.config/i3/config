@@ -105,7 +105,6 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws0 notes
 set $ws1 "1"
 set $ws2 "2"
 set $ws3 "3"
@@ -117,8 +116,11 @@ set $ws8 "8"
 set $ws9 "9"
 set $ws10 "10"
 
+set $ws_notes "notes"
+set $ws_steam "steam"
+set $ws_games "games"
+
 # switch to workspace
-bindsym $mod+grave workspace $ws0
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2
 bindsym $mod+3 workspace number $ws3
@@ -130,8 +132,11 @@ bindsym $mod+8 workspace number $ws8
 bindsym $mod+9 workspace number $ws9
 bindsym $mod+0 workspace number $ws10
 
+bindsym $mod+grave workspace $ws_notes
+bindsym $mod+minus workspace $ws_steam
+bindsym $mod+equal workspace $ws_games
+
 # move focused container to workspace
-bindsym $mod+Shift+grave move container to workspace $ws0
 bindsym $mod+Shift+1 move container to workspace number $ws1
 bindsym $mod+Shift+2 move container to workspace number $ws2
 bindsym $mod+Shift+3 move container to workspace number $ws3
@@ -142,6 +147,10 @@ bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
+
+bindsym $mod+Shift+grave move container to workspace $ws_notes
+bindsym $mod+Shift+minus move container to workspace $ws_steam
+bindsym $mod+Shift+equal move container to workspace $ws_games
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
@@ -200,6 +209,9 @@ exec /home/nd/Applications/Todoist
 for_window [class="Gnome-calculator"] floating enable
 for_window [title="Picture-in-Picture"] floating enable
 for_window [title="Bitwarden"] floating enable
+
+for_window [class="steam"] move to workspace $ws_steam
+for_window [instance="^steam_app_.*"] move to workspace $ws_games, floating enable
 
 # ------------------------------------------
 # CUSTOM KEYS

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Skip if any Steam-related process is running
+if pgrep -x steam >/dev/null; then
+  exit 0
+fi
+
 VOLUME=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\d+%' | head -1 | tr -d '%')
 
 ICON="🔊"
