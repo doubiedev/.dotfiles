@@ -319,6 +319,9 @@ bindsym $mod+t exec /home/nd/Applications/Todoist
 # Vlc
 bindsym $mod+Shift+v exec vlc
 
+# Splatmoji
+bindsym $mod+period exec "splatmoji copy"
+
 # Screenshots
 # key: PrtSc
 # dependencies: maim, xclip
