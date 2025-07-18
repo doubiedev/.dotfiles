@@ -18,6 +18,7 @@ Requires:
     - redshift
     - obsidian
     - pasystray
+    - splatmoji
 - tmux tpm
     - git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 - lazygit
