@@ -285,9 +285,9 @@ mode "$mode_music" {
 bindsym $mod+p mode "$mode_xrandr"
 set $mode_xrandr Set monitors: (r)eset, (2)dual-monitors-hdmi, (3)single-ext-monitor, (m)box-ext-1, (M)box-ext-2
 mode "$mode_xrandr" {
-    bindsym r exec --no-startup-id "xrandr --output eDP-1 --auto --output HDMI-2 --off --output DP-1-0 --off --output HDMI-1-0 --off", mode "default"
+    bindsym r exec --no-startup-id "xrandr --output eDP-1 --primary --auto --output HDMI-2 --off --output DP-1-0 --off --output HDMI-1-0 --off", mode "default"
     bindsym 2 exec --no-startup-id "xrandr --output eDP-1 --auto --pos 0x0 --output HDMI-2 --primary --auto --right-of eDP-1", mode "default"
-    bindsym 3 exec --no-startup-id "xrandr --output eDP-1 --off --output HDMI-2 --auto", mode "default"
+    bindsym 3 exec --no-startup-id "xrandr --output eDP-1 --off --output HDMI-2 --primary --auto", mode "default"
     bindsym m exec --no-startup-id "xrandr --output eDP-1 --off --output DP-1-0 --primary --mode 3440x1440 --rate 165.00 --output HDMI-1-0 --mode 1920x1080 --rate 144.00 --right-of DP-1-0", mode "default"
     bindsym Shift+m exec --no-startup-id "xrandr --output eDP-1 --off --output DP-1-0 --primary --mode 3440x1440 --rate 165.00", mode "default"
 
