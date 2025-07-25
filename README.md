@@ -2,9 +2,17 @@
 
 Requires:
 - stow >= 2.4.0
+    - perl -MCPAN -e shell
+        - (make sure you are 'sudo' not 'local::lib')
+        - install Test::More
+        - install Test::Output
+    - autoreconf -iv
+    - sudo apt install texinfo
+    - touch ChangeLog
+    - sudo ./configure && sudo make install
 - ripgrep
 - gcc
-- (some others not listed - need to include)
+- fzf
 - [ghostty](https://github.com/mkasberg/ghostty-ubuntu)
 - keychain
 - i3
