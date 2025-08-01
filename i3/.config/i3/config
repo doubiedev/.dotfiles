@@ -333,10 +333,11 @@ bindsym Print exec NOW=$(date +%Y-%m-%d_%H-%M-%S) && maim --format png --select 
 
 # SYSTEM
 # Gnome Keyring & SSH
-exec_always dbus-update-activation-environment --all
+# exec /usr/libexec/gnome-settings-daemon
+exec dbus-update-activation-environment --all
 # keyring can have --components=ssh,secrets,pkcs11
-exec_always /usr/bin/gnome-keyring-daemon --start --components=secrets,pkcs11
-exec_always --no-startup-id env XDG_CURRENT_DESKTOP=GNOME
+exec /usr/bin/gnome-keyring-daemon --start --components=secrets,pkcs11
+exec --no-startup-id env XDG_CURRENT_DESKTOP=GNOME
 
 # APPLICATIONS
 # Syncthing

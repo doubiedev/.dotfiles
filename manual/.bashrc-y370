@@ -118,7 +118,11 @@ if ! shopt -oq posix; then
 fi
 
 eval "$(starship init bash)"
-eval ``keychain --eval --agents ssh id_ed25519
+
+# Keychain
+# eval ``keychain --eval --agents ssh id_ed25519
+/usr/bin/keychain $HOME/.ssh/id_ed25519
+source $HOME/.keychain/$HOSTNAME-sh
 
 # neofetch_count=$(ps aux | grep -i "neofetch" | grep -v "grep" | wc -l)
 #
