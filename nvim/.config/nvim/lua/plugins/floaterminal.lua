@@ -1,7 +1,5 @@
 return {
     setup = function()
-        vim.keymap.set("t", "<esc><esc>", "<c-\\><c-n>")
-
         local state = {
             floating = {
                 buf = -1,
@@ -49,6 +47,8 @@ return {
                 if vim.bo[state.floating.buf].buftype ~= "terminal" then
                     vim.cmd.terminal()
                 end
+
+                vim.keymap.set("t", "<esc><esc>", "<c-\\><c-n>", { buffer = state.floating.buf })
             else
                 vim.api.nvim_win_hide(state.floating.win)
             end
