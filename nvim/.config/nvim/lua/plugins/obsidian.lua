@@ -27,33 +27,72 @@ return {
         vim.keymap.set("n", "<leader>ow", ":ObsidianWorkspace<CR>", { desc = "Switch workspace" })
         vim.keymap.set("n", "<leader>ov", ":ObsidianPasteImg<CR>", { desc = "Paste an image from clipboard" })
         vim.keymap.set("n", "<leader>or", ":ObsidianRename<CR>", { desc = "Rename current note and update backlinks" })
-        -- vim.keymap.set("n", "<leader>och", ":ObsidianToggleCheckbox<CR>", { desc = "Toggle checkbox state" })
 
         require("obsidian").setup({
             workspaces = {
                 {
-                    name = "notes",
-                    path = "~/notes",
-                },
-                {
                     name = "devlog",
                     path = "~/notes/DevLog",
-                    strict = true,
                     overrides = {
                         daily_notes = {
-                            folder = "../DevLog",
-                            template = "../Templates/Temporal/DevLogDaily.md",
-                        }
+                            folder = "DevLog/Daily",
+                            date_format = "%Y-%m-%d DevLog",
+                            template = "DevLog/DevLog-Daily.md",
+                        },
+                        templates = {
+                            substitutions = {
+                                date = function()
+                                    return os.date("%Y-%m-%d")
+                                end,
+                                created = function()
+                                    return os.date("%Y-%m-%d %H:%M:%S")
+                                end,
+                                updated = function()
+                                    return os.date("%Y-%m-%d %H:%M:%S")
+                                end,
+                                day_date = function()
+                                    local suffix = function(d)
+                                        if d == 11 or d == 12 or d == 13 then return "th" end
+                                        local last = d % 10
+                                        if last == 1 then
+                                            return "st"
+                                        elseif last == 2 then
+                                            return "nd"
+                                        elseif last == 3 then
+                                            return "rd"
+                                        else
+                                            return "th"
+                                        end
+                                    end
+
+                                    local day = tonumber(os.date("%d"))
+                                    local day_name = os.date("%A")
+                                    local month = os.date("%B")
+
+                                    return string.format("%s %d%s %s", day_name, day, suffix(day), month)
+                                end,
+                            },
+                        },
+                    },
+                },
+                {
+                    name = "notes",
+                    path = "~/notes",
+                    overrides = {
+                        daily_notes = {
+                            folder = "Journal/Daily",
+                            template = "Temporal/Daily.md",
+                        },
                     },
                 },
             },
 
             log_level = vim.log.levels.INFO,
 
-            daily_notes = {
-                folder = "Journal/Daily",
-                template = "Temporal/Daily.md",
-            },
+            -- daily_notes = {
+            --     folder = "Journal/Daily",
+            --     template = "Temporal/Daily.md",
+            -- },
 
             -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
             completion = {
