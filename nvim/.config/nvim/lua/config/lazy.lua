@@ -112,7 +112,7 @@ vim.opt.colorcolumn = "80"
 
 -- vim.opt.conceallevel = 1
 
-vim.g.mapleader = " "
+-- vim.g.mapleader = " "
 
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 
