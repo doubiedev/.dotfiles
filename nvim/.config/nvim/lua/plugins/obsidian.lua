@@ -45,10 +45,10 @@ return {
                                     return os.date("%Y-%m-%d")
                                 end,
                                 created = function()
-                                    return os.date("%Y-%m-%d %H:%M:%S")
+                                    return os.date("%Y-%m-%dT%H:%M")
                                 end,
                                 updated = function()
-                                    return os.date("%Y-%m-%d %H:%M:%S")
+                                    return os.date("%Y-%m-%dT%H:%M")
                                 end,
                                 day_date = function()
                                     local suffix = function(d)
