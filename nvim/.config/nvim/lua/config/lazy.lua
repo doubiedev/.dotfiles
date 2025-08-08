@@ -28,7 +28,7 @@ vim.g.maplocalleader = ","
 -- ============================================================================
 -- REMAPS
 -- ============================================================================
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open netrw" })
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open netrw/oil" })
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
@@ -64,9 +64,6 @@ vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz", { desc = "Go to next quickfix i
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz", { desc = "Go to previous quickfix item" })
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Go to next location list item" })
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Go to previous location list item" })
-
--- vim.keymap.set("n", "<leader>h", "<C-w>h", { desc = "Move to left split" })
--- vim.keymap.set("n", "<leader>l", "<C-w>l", { desc = "Move to right split" })
 
 vim.keymap.set("n", "<leader>s", ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>",
     { desc = "Search and replace for word under cursor" })
@@ -220,6 +217,29 @@ require("lazy").setup({
             },
         },
         {
+            "folke/which-key.nvim",
+            event = "VeryLazy",
+            opts = {},
+            keys = {
+                {
+                    "<leader>?",
+                    function() require("which-key").show({ global = false }) end,
+                    desc = "Buffer Local Keymaps (which-key)",
+                },
+            },
+        },
+        {
+            "folke/todo-comments.nvim",
+            dependencies = { "nvim-lua/plenary.nvim" },
+            opts = {}
+        },
+        {
+            "folke/ts-comments.nvim",
+            opts = {},
+            event = "VeryLazy",
+            enabled = vim.fn.has("nvim-0.10.0") == 1,
+        },
+        {
             "oysandvik94/curl.nvim",
             cmd = { "CurlOpen" },
             dependencies = {
@@ -228,27 +248,8 @@ require("lazy").setup({
             config = true,
         },
         {
-            "folke/which-key.nvim",
-            event = "VeryLazy",
-            opts = {},
-            keys = {
-                {
-                    "<leader>?",
-                    function()
-                        require("which-key").show({ global = false })
-                    end,
-                    desc = "Buffer Local Keymaps (which-key)",
-                },
-            },
-        },
-        {
             "echasnovski/mini.nvim",
             version = '*',
-        },
-        {
-            "folke/todo-comments.nvim",
-            dependencies = { "nvim-lua/plenary.nvim" },
-            opts = {}
         },
         {
             "epwalsh/obsidian.nvim",
@@ -268,6 +269,14 @@ require("lazy").setup({
         {
             "rmagatti/auto-session",
             lazy = false,
+
+            ---enables autocomplete for opts
+            ---@module "auto-session"
+            ---@type AutoSession.Config
+            opts = {
+                suppressed_dirs = { "~/", "~/projects", "~/Downloads", "/" },
+                -- log_level = 'debug',
+            },
         },
         {
             "stevearc/oil.nvim",
@@ -300,36 +309,24 @@ require("lazy").setup({
             dependencies = "nvzone/volt",
             opts = {},
             cmd = { "Typr", "TyprStats" },
+            keys = {
+                { "<leader>ty", "<cmd>Typr<cr>", desc = "Typr" }
+            }
         },
         {
             "habamax/vim-godot",
             event = 'VimEnter',
         },
-        -- {
-        --     "nvim-neorg/neorg",
-        --     lazy = false,
-        --     version = "9.2.0", -- Pin Neorg to the latest stable release
-        --     config = function()
-        --         require("plugins.neorg").setup()
-        --     end
-        -- },
         {
             'MeanderingProgrammer/render-markdown.nvim',
             dependencies = {
                 'nvim-treesitter/nvim-treesitter',
                 'echasnovski/mini.nvim', -- if you use the mini.nvim suite
             },
+            ---@module 'render-markdown'
+            ---@type render.md.UserConfig
+            opts = {},
         },
-        -- {
-        --     "iamcco/markdown-preview.nvim",
-        --     cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-        --     ft = { 'markdown' },
-        --     -- build = function()
-        --     --     vim.cmd [[Lazy load markdown-preview.nvim]]
-        --     --     vim.fn['mkdp#util#install']()
-        --     -- end,
-        --     build = ":call mkdp#util#install()",
-        -- },
         {
             "nvimtools/none-ls.nvim",
             dependencies = { "nvim-lua/plenary.nvim" },
@@ -353,17 +350,17 @@ require("lazy").setup({
 
         },
         {
-            "folke/ts-comments.nvim",
-            opts = {},
-            event = "VeryLazy",
-            enabled = vim.fn.has("nvim-0.10.0") == 1,
+            "ThePrimeagen/vim-be-good",
+            cmd = { "VimBeGood" },
+            keys = {
+                { "<leader>tv", "<cmd>VimBeGood<cr>", desc = "Open Vim Be Good" }
+            }
         },
         -- {
         --     "windwp/nvim-ts-autotag",
         -- },
-        'ThePrimeagen/vim-be-good',
-        'RishabhRD/popfix',
-        'RishabhRD/nvim-cheat.sh',
+        -- 'RishabhRD/popfix',
+        -- 'RishabhRD/nvim-cheat.sh',
         'folke/zen-mode.nvim',
         'mbbill/undotree',
         'tpope/vim-fugitive',
