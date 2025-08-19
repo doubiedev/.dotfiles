@@ -117,7 +117,7 @@ set $ws9 "9"
 set $ws10 "10"
 
 set $ws_notes "notes"
-set $ws_steam "steam"
+set $ws_todoist "todoist"
 set $ws_games "games"
 
 # switch to workspace
@@ -133,7 +133,7 @@ bindsym $mod+9 workspace number $ws9
 bindsym $mod+0 workspace number $ws10
 
 bindsym $mod+grave workspace $ws_notes
-bindsym $mod+minus workspace $ws_steam
+bindsym $mod+minus workspace $ws_todoist
 bindsym $mod+equal workspace $ws_games
 
 # move focused container to workspace
@@ -149,7 +149,7 @@ bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
 bindsym $mod+Shift+grave move container to workspace $ws_notes
-bindsym $mod+Shift+minus move container to workspace $ws_steam
+bindsym $mod+Shift+minus move container to workspace $ws_todoist
 bindsym $mod+Shift+equal move container to workspace $ws_games
 
 # reload the configuration file
@@ -199,7 +199,7 @@ workspace_auto_back_and_forth yes
 # ------------------------------------------
 
 assign [class="obsidian"] notes
-assign [class="Todoist"] 9
+assign [class="Todoist"] todoist
 assign [class="mpv"] 10
 
 exec i3-msg 'workspace 2, exec i3-sensible-terminal'
