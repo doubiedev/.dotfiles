@@ -259,7 +259,7 @@ bindsym $mod+n mode "$mode_redshift"
 set $mode_redshift Set colour temperature: (a)uto, (r)eset, (1)900K (2)500K, (3)000K, (4)000K, (5)000K
 set $kill_redshift pkill -9 redshift;
 mode "$mode_redshift" {
-    bindsym a exec --no-startup-id "$kill_redshift redshift -P -t 5000:4000", mode "default"
+    bindsym a exec --no-startup-id "$kill_redshift redshift -P -t 5000:1900", mode "default"
     bindsym r exec --no-startup-id "$kill_redshift redshift -x", mode "default"
     bindsym 1 exec --no-startup-id "$kill_redshift redshift -P -O 1900", mode "default"
     bindsym 2 exec --no-startup-id "$kill_redshift redshift -P -O 2500", mode "default"
