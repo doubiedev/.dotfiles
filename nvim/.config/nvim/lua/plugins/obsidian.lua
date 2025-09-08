@@ -37,7 +37,7 @@ return {
                         daily_notes = {
                             folder = "DevLog/Daily",
                             date_format = "%Y-%m-%d DevLog",
-                            template = "DevLog/DevLog-Daily.md",
+                            template = "Temporal/Daily-DevLog-nvim.md",
                         },
                         templates = {
                             substitutions = {
@@ -70,6 +70,12 @@ return {
                                     local month = os.date("%B")
 
                                     return string.format("%s %d%s %s", day_name, day, suffix(day), month)
+                                end,
+                                yesterday = function()
+                                    return os.date("%Y-%m-%d", os.time() - 24 * 60 * 60) .. " DevLog"
+                                end,
+                                tomorrow = function()
+                                    return os.date("%Y-%m-%d", os.time() + 24 * 60 * 60) .. " DevLog"
                                 end,
                             },
                         },
