@@ -72,6 +72,14 @@ vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { desc = "Make current 
 
 vim.keymap.set("n", "<leader>ww", "<cmd>set wrap!<CR>", { desc = "Toggle line wrapping" })
 
+vim.keymap.set("n", "<M-h>", "<C-w>h", { desc = "Move to left split" })
+vim.keymap.set("n", "<M-j>", "<C-w>j", { desc = "Move to below split" })
+vim.keymap.set("n", "<M-k>", "<C-w>k", { desc = "Move to above split" })
+vim.keymap.set("n", "<M-l>", "<C-w>l", { desc = "Move to right split" })
+vim.keymap.set("n", "<M-q>", "<cmd>close<CR>", { desc = "Close split" })
+vim.keymap.set("n", "<M-p>", "<C-w>p", { desc = "Switch to previous window" })
+vim.keymap.set("n", "<M-w>", "<C-w>w", { desc = "Cycle through windows" })
+
 -- ============================================================================
 -- SETTINGS (VIM)
 -- ============================================================================
