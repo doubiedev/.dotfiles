@@ -31,57 +31,6 @@ return {
         require("obsidian").setup({
             workspaces = {
                 {
-                    name = "devlog",
-                    path = "~/notes/DevLog",
-                    overrides = {
-                        daily_notes = {
-                            folder = "DevLog/Daily",
-                            date_format = "%Y-%m-%d DevLog",
-                            template = "Temporal/Daily-DevLog-nvim.md",
-                        },
-                        templates = {
-                            substitutions = {
-                                date = function()
-                                    return os.date("%Y-%m-%d")
-                                end,
-                                created = function()
-                                    return os.date("%Y-%m-%dT%H:%M")
-                                end,
-                                updated = function()
-                                    return os.date("%Y-%m-%dT%H:%M")
-                                end,
-                                day_date = function()
-                                    local suffix = function(d)
-                                        if d == 11 or d == 12 or d == 13 then return "th" end
-                                        local last = d % 10
-                                        if last == 1 then
-                                            return "st"
-                                        elseif last == 2 then
-                                            return "nd"
-                                        elseif last == 3 then
-                                            return "rd"
-                                        else
-                                            return "th"
-                                        end
-                                    end
-
-                                    local day = tonumber(os.date("%d"))
-                                    local day_name = os.date("%A")
-                                    local month = os.date("%B")
-
-                                    return string.format("%s %d%s %s", day_name, day, suffix(day), month)
-                                end,
-                                yesterday = function()
-                                    return os.date("%Y-%m-%d", os.time() - 24 * 60 * 60) .. " DevLog"
-                                end,
-                                tomorrow = function()
-                                    return os.date("%Y-%m-%d", os.time() + 24 * 60 * 60) .. " DevLog"
-                                end,
-                            },
-                        },
-                    },
-                },
-                {
                     name = "notes",
                     path = "~/notes",
                     overrides = {
@@ -91,6 +40,57 @@ return {
                         },
                     },
                 },
+                -- {
+                --     name = "devlog",
+                --     path = "~/notes/DevLog",
+                --     overrides = {
+                --         daily_notes = {
+                --             folder = "DevLog/Daily",
+                --             date_format = "%Y-%m-%d DevLog",
+                --             template = "Temporal/Daily-DevLog-nvim.md",
+                --         },
+                --         templates = {
+                --             substitutions = {
+                --                 date = function()
+                --                     return os.date("%Y-%m-%d")
+                --                 end,
+                --                 created = function()
+                --                     return os.date("%Y-%m-%dT%H:%M")
+                --                 end,
+                --                 updated = function()
+                --                     return os.date("%Y-%m-%dT%H:%M")
+                --                 end,
+                --                 day_date = function()
+                --                     local suffix = function(d)
+                --                         if d == 11 or d == 12 or d == 13 then return "th" end
+                --                         local last = d % 10
+                --                         if last == 1 then
+                --                             return "st"
+                --                         elseif last == 2 then
+                --                             return "nd"
+                --                         elseif last == 3 then
+                --                             return "rd"
+                --                         else
+                --                             return "th"
+                --                         end
+                --                     end
+                --
+                --                     local day = tonumber(os.date("%d"))
+                --                     local day_name = os.date("%A")
+                --                     local month = os.date("%B")
+                --
+                --                     return string.format("%s %d%s %s", day_name, day, suffix(day), month)
+                --                 end,
+                --                 yesterday = function()
+                --                     return os.date("%Y-%m-%d", os.time() - 24 * 60 * 60) .. " DevLog"
+                --                 end,
+                --                 tomorrow = function()
+                --                     return os.date("%Y-%m-%d", os.time() + 24 * 60 * 60) .. " DevLog"
+                --                 end,
+                --             },
+                --         },
+                --     },
+                -- },
             },
 
             log_level = vim.log.levels.INFO,
