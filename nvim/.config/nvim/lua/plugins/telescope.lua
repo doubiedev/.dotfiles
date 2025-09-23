@@ -5,8 +5,8 @@ return {
         local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 
 
-        vim.keymap.set('n', '<leader>pF', builtin.find_files, { desc = "Search for files in the project" })
-        vim.keymap.set('n', '<leader>pf', function()
+        vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "Search for files in the project" })
+        vim.keymap.set('n', '<leader>pF', function()
             builtin.find_files {
                 find_command = { 'rg', '--files', '--hidden', '--glob', '!.git/**' },
             }
