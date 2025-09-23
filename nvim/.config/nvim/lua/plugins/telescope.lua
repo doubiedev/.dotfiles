@@ -6,7 +6,7 @@ return {
 
 
         vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = "Search for files in the project" })
-        vim.keymap.set('n', '<leader>pd', function()
+        vim.keymap.set('n', '<leader>pF', function()
             builtin.find_files {
                 find_command = { 'rg', '--files', '--hidden', '--glob', '!.git/**' },
             }
