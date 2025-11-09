@@ -6,6 +6,25 @@ return {
         vim.api.nvim_create_user_command("Vexplore", "rightbelow vsplit | Oil <args>", { nargs = "?", complete = "dir" })
         vim.api.nvim_create_user_command("Texplore", "tabedit % | Oil <args>", { nargs = "?", complete = "dir" })
 
+
+        vim.keymap.set("n", "<leader>pp", function()
+            local function get_tmux_cwd()
+                local handle = io.popen("tmux display-message -p -F '#{pane_current_path}' 2>/dev/null")
+                if handle then
+                    local result = handle:read("*l")
+                    handle:close()
+                    return result
+                end
+            end
+
+            local cwd = get_tmux_cwd()
+            if cwd and #cwd > 0 then
+                vim.cmd("Oil " .. vim.fn.fnameescape(cwd))
+            else
+                print("Could not detect tmux directory")
+            end
+        end, { desc = "Open tmux project dir" })
+
         require("oil").setup({
             -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
             -- Set to false if you want some other plugin (e.g. netrw) to open when you edit directories.
