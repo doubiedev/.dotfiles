@@ -2,3 +2,4 @@
 bin/.local/share/nvim
 bin/.local/state
 bin/.local/share/tmux
+**.uuid
