@@ -207,6 +207,7 @@ exec /home/nd/Applications/Obsidian
 exec /home/nd/Applications/Todoist
 
 for_window [class="Gnome-calculator"] floating enable
+for_window [instance="Godot_Engine"] floating enable
 for_window [title="Picture-in-Picture"] floating enable
 for_window [title="Bitwarden"] floating enable
 
