@@ -42,16 +42,18 @@ return {
                 .capabilities
         })
 
-        -- Toggle Godot server
+        -- Toggle Godot server and theme
         local godot_server_id = nil
 
         vim.keymap.set('n', '<leader>gd', function()
             if godot_server_id == nil then
                 godot_server_id = vim.fn.serverstart('127.0.0.1:6004')
+                vim.cmd('colorscheme godotcolor')
                 print("Godot server started on 127.0.0.1:6004")
             else
                 vim.fn.serverstop(godot_server_id)
                 godot_server_id = nil
+                vim.cmd('colorscheme rose-pine')
                 print("Godot server stopped")
             end
         end, { noremap = true, silent = true })
