@@ -37,7 +37,7 @@ return {
         })
 
         require('lspconfig').gdscript.setup({
-            -- cmd = { "godot-wsl-lsp" },
+            cmd = { "godot-wsl-lsp" },
             lspconfig_defaults
                 .capabilities
         })
