@@ -77,3 +77,22 @@ curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/downl
 tar xf lazygit.tar.gz lazygit
 sudo install lazygit -D -t /usr/local/bin/
 ```
+
+# FOR NVIM GODOT
+Editor settings:
+Language Server Remote Host: 0.0.0.0
+
+External editor:
+Exec Path = C:/Users/nd/scripts/nvim.cmd
+Exec Flags = {file} {line} {col}
+
+ALWAYS OPEN NVIM WITH `nvim --listen /tmp/godot.pipe`
+Have a .bashrc alias for gv
+
+### nvim.cmd
+@echo off
+wsl wslpath "%1" > tmpfile
+set /p filepath= < tmpfile
+del tmpfile
+wsl nvim --server "/tmp/godot.pipe" --remote-send "<esc>:n %filepath%<CR>:call cursor(%2,%3)<CR>"
+

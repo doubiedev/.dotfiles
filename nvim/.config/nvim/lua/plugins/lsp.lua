@@ -36,10 +36,16 @@ return {
             end,
         })
 
-        require('lspconfig').gdscript.setup({
-            cmd = { "godot-wsl-lsp" },
-            lspconfig_defaults
-                .capabilities
+
+        require("lspconfig").gdscript.setup({
+            cmd = { "godot-wsl-lsp", "--host", "192.168.0.111", "--experimentalFastPathConversion" }, -- Windows host IP
+            filetypes = { "gdscript" },
+            root_dir = function(fname)
+                return vim.fs.dirname(vim.fs.find({ "project.godot", ".git" }, {
+                    upward = true,
+                    path = vim.fs.dirname(fname)
+                })[1])
+            end,
         })
 
         -- Toggle Godot server and theme
