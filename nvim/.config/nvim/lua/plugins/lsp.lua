@@ -42,19 +42,40 @@ return {
                 .capabilities
         })
 
-        -- Toggle Godot server and theme
+        -- Toggle Godot server
         local godot_server_id = nil
 
         vim.keymap.set('n', '<leader>gd', function()
             if godot_server_id == nil then
                 godot_server_id = vim.fn.serverstart('127.0.0.1:6004')
-                vim.cmd('colorscheme godotcolor')
                 print("Godot server started on 127.0.0.1:6004")
             else
                 vim.fn.serverstop(godot_server_id)
                 godot_server_id = nil
-                vim.cmd('colorscheme rose-pine')
                 print("Godot server stopped")
+            end
+        end, { noremap = true, silent = true })
+
+        -- Toggle Godot theme
+        local godot_theme_enabled = false
+        local original_colorscheme = vim.g.colors_name
+
+        vim.keymap.set('n', '<leader>gt', function()
+            if not godot_theme_enabled then
+                original_colorscheme = vim.g.colors_name
+
+                vim.cmd('colorscheme godotcolor')
+                godot_theme_enabled = true
+                print("Switched to Godot theme")
+            else
+                if original_colorscheme then
+                    vim.cmd('colorscheme ' .. original_colorscheme)
+                else
+                    print("No previous colorscheme found (using default)")
+                end
+
+                godot_theme_enabled = false
+                print("Restored original theme: " .. (original_colorscheme or "default"))
             end
         end, { noremap = true, silent = true })
 
