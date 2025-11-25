@@ -2,52 +2,61 @@ return {
     setup = function()
         vim.opt.signcolumn = 'yes'
 
-        local lspconfig_defaults = require('lspconfig').util.default_config
-        lspconfig_defaults.capabilities = vim.tbl_deep_extend(
-            'force',
-            lspconfig_defaults.capabilities,
-            require('cmp_nvim_lsp').default_capabilities()
+        local base_capabilities = vim.lsp.protocol.make_client_capabilities()
+        local capabilities = vim.tbl_deep_extend(
+            "force",
+            base_capabilities,
+            require("cmp_nvim_lsp").default_capabilities()
         )
 
-        vim.api.nvim_create_autocmd('LspAttach', {
-            desc = 'LSP actions',
+        -----------------------------------------------------------------------
+        -- LspAttach Keymaps
+        -----------------------------------------------------------------------
+        vim.api.nvim_create_autocmd("LspAttach", {
+            desc = "LSP actions",
             callback = function(event)
                 local opts = { buffer = event.buf }
 
-                vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-                vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-                vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-                vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-                vim.keymap.set('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-                vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-                vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-                vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-                vim.keymap.set({ 'n', 'x' }, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
-                vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+                vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+                vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+                vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+                vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+                vim.keymap.set("n", "go", vim.lsp.buf.type_definition, opts)
+                vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+                vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, opts)
+                vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
+                vim.keymap.set({ "n", "x" }, "<F3>", function()
+                    vim.lsp.buf.format({ async = true })
+                end, opts)
+                vim.keymap.set("n", "<F4>", vim.lsp.buf.code_action, opts)
 
-                vim.keymap.set("n", "<leader>vws", '<cmd>lua vim.lsp.buf.workspace_symbol()<cr>', opts)
-                vim.keymap.set("n", "<leader>vd", '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
-                vim.keymap.set("n", "[d", '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
-                vim.keymap.set("n", "]d", '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
-                vim.keymap.set("n", "<leader>vca", '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
-                vim.keymap.set("n", "<leader>vrr", '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-                vim.keymap.set("n", "<leader>vrn", '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-                vim.keymap.set("i", "<C-h>", '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+                vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
+                vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
+                vim.keymap.set("n", "[d", vim.diagnostic.goto_next, opts)
+                vim.keymap.set("n", "]d", vim.diagnostic.goto_prev, opts)
+                vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, opts)
+                vim.keymap.set("n", "<leader>vrr", vim.lsp.buf.references, opts)
+                vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts)
+                vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
             end,
         })
 
-        require('lspconfig').gdscript.setup({
+        -----------------------------------------------------------------------
+        -- GDScript LSP
+        -----------------------------------------------------------------------
+        vim.lsp.config("gdscript", {
+            capabilities = capabilities,
             -- cmd = { "godot-wsl-lsp" },
-            lspconfig_defaults
-                .capabilities
         })
 
+        -----------------------------------------------------------------------
         -- Toggle Godot server
+        -----------------------------------------------------------------------
         local godot_server_id = nil
 
-        vim.keymap.set('n', '<leader>gd', function()
+        vim.keymap.set("n", "<leader>gd", function()
             if godot_server_id == nil then
-                godot_server_id = vim.fn.serverstart('127.0.0.1:6004')
+                godot_server_id = vim.fn.serverstart("127.0.0.1:6004")
                 print("Godot server started on 127.0.0.1:6004")
             else
                 vim.fn.serverstop(godot_server_id)
@@ -56,130 +65,105 @@ return {
             end
         end, { noremap = true, silent = true })
 
+        -----------------------------------------------------------------------
         -- Toggle Godot theme
+        -----------------------------------------------------------------------
         local godot_theme_enabled = false
         local original_colorscheme = vim.g.colors_name
 
-        vim.keymap.set('n', '<leader>gt', function()
+        vim.keymap.set("n", "<leader>gt", function()
             if not godot_theme_enabled then
                 original_colorscheme = vim.g.colors_name
-
-                vim.cmd('colorscheme godotcolor')
+                vim.cmd("colorscheme godotcolor")
                 godot_theme_enabled = true
                 print("Switched to Godot theme")
             else
                 if original_colorscheme then
-                    vim.cmd('colorscheme ' .. original_colorscheme)
+                    vim.cmd("colorscheme " .. original_colorscheme)
                 else
                     print("No previous colorscheme found (using default)")
                 end
-
                 godot_theme_enabled = false
                 print("Restored original theme: " .. (original_colorscheme or "default"))
             end
         end, { noremap = true, silent = true })
 
-        local cmp = require('cmp')
-        require('luasnip.loaders.from_vscode').lazy_load()
-        require("vim-react-snippets").lazy_load()
+        -----------------------------------------------------------------------
+        -- CMP
+        -----------------------------------------------------------------------
+        local cmp = require("cmp")
+        -- require("luasnip.loaders.from_vscode").lazy_load()
+        -- require("vim-react-snippets").lazy_load()
 
         cmp.setup({
             sources = {
-                { name = 'nvim_lsp' },
-                { name = 'luasnip' }, -- if using snippets
-                { name = 'render-markdown' },
+                { name = "nvim_lsp" },
+                { name = "luasnip" },
+                { name = "render-markdown" },
             },
             snippet = {
                 expand = function(args)
-                    -- You need Neovim v0.10 to use vim.snippet
                     vim.snippet.expand(args.body)
                 end,
             },
             mapping = cmp.mapping.preset.insert({
-                -- ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-                -- ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                -- ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                -- ['<C-Space>'] = cmp.mapping.complete(),
-                -- confirm completion item
-                ['<CR>'] = cmp.mapping.confirm({ select = false }),
-
-                -- scroll documentation window
-                ['<C-f>'] = cmp.mapping.scroll_docs(5),
-                ['<C-u>'] = cmp.mapping.scroll_docs(-5),
-
-                -- toggle completion menu
-                ['<C-e>'] = cmp.mapping(function(fallback)
-                    if cmp.visible() then
-                        cmp.abort()
-                    else
-                        cmp.complete()
-                    end
+                ["<CR>"] = cmp.mapping.confirm({ select = false }),
+                ["<C-f>"] = cmp.mapping.scroll_docs(5),
+                ["<C-u>"] = cmp.mapping.scroll_docs(-5),
+                ["<C-e>"] = cmp.mapping(function()
+                    if cmp.visible() then cmp.abort() else cmp.complete() end
                 end),
-
-                -- tab complete
-                ['<Tab>'] = cmp.mapping(function(fallback)
-                    local col = vim.fn.col('.') - 1
-
+                ["<Tab>"] = cmp.mapping(function(fallback)
+                    local col = vim.fn.col(".") - 1
                     if cmp.visible() then
-                        cmp.select_next_item({ behavior = 'select' })
-                    elseif col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
+                        cmp.select_next_item({ behavior = "select" })
+                    elseif col == 0 or vim.fn.getline("."):sub(col, col):match("%s") then
                         fallback()
                     else
                         cmp.complete()
                     end
-                end, { 'i', 's' }),
-
-                -- go to previous item
-                ['<S-Tab>'] = cmp.mapping.select_prev_item({ behavior = 'select' }),
-
-                -- navigate to next snippet placeholder
-                ['<C-d>'] = cmp.mapping(function(fallback)
-                    local luasnip = require('luasnip')
-
-                    if luasnip.jumpable(1) then
-                        luasnip.jump(1)
-                    else
-                        fallback()
-                    end
-                end, { 'i', 's' }),
+                end, { "i", "s" }),
+                ["<S-Tab>"] = cmp.mapping.select_prev_item({ behavior = "select" }),
+                ["<C-d>"] = cmp.mapping(function(fallback)
+                    local luasnip = require("luasnip")
+                    if luasnip.jumpable(1) then luasnip.jump(1) else fallback() end
+                end, { "i", "s" }),
             }),
         })
 
+        -----------------------------------------------------------------------
+        -- Diagnostics
+        -----------------------------------------------------------------------
         vim.diagnostic.config({
             virtual_text = true,
             signs = {
                 text = {
-                    [vim.diagnostic.severity.ERROR] = 'E',
-                    [vim.diagnostic.severity.WARN] = 'W',
-                    [vim.diagnostic.severity.HINT] = 'H',
-                    [vim.diagnostic.severity.INFO] = 'I',
+                    [vim.diagnostic.severity.ERROR] = "E",
+                    [vim.diagnostic.severity.WARN] = "W",
+                    [vim.diagnostic.severity.HINT] = "H",
+                    [vim.diagnostic.severity.INFO] = "I",
                 },
             },
         })
 
-        require('mason').setup({})
-        require('mason-lspconfig').setup({
+        -----------------------------------------------------------------------
+        -- Mason
+        -----------------------------------------------------------------------
+        require("mason").setup({})
+        require("mason-lspconfig").setup({
             ensure_installed = {
-                -- 'gopls',
-                'lua_ls',
-                'marksman',
+                "lua_ls",
+                "marksman",
             },
             handlers = {
-                function(server_name)
-                    if server_name == "eslint" then
-                        return
-                    end
-                    require('lspconfig')[server_name].setup({})
+                function(server)
+                    if server == "eslint" then return end
+                    vim.lsp.config(server, {
+                        capabilities = capabilities,
+                    })
                 end,
-            },
-            settings = {
-                Lua = {
-                    diagnostics = {
-                        globals = { 'vim' },
-                    },
-                },
             },
             automatic_installation = true,
         })
-    end
+    end,
 }
