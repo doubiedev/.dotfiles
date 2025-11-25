@@ -364,6 +364,7 @@ require("lazy").setup({
                 { "<leader>tv", "<cmd>VimBeGood<cr>", desc = "Open Vim Be Good" }
             }
         },
+        { "nvim-tree/nvim-web-devicons", opts = {} },
         -- {
         --     "windwp/nvim-ts-autotag",
         -- },
