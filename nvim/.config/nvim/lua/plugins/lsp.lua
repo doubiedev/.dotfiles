@@ -98,9 +98,20 @@ return {
         cmp.setup({
             sources = {
                 { name = "nvim_lsp" },
-                { name = "luasnip" },
+                -- { name = "luasnip" },
                 { name = "render-markdown" },
             },
+            formatting = {
+                fields = { "abbr", "kind", "menu" },
+            },
+            experimental = {
+                ghost_text = false,
+            },
+            completion = {
+                -- THIS LINE STOPS DOUBLE INSERTS
+                completeopt = "menu,menuone,noinsert",
+            },
+
             snippet = {
                 expand = function(args)
                     vim.snippet.expand(args.body)
