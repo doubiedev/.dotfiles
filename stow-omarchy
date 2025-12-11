@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ -z $STOW_FOLDERS ]]; then
-    STOW_FOLDERS="hyprland"
+    STOW_FOLDERS="ghostty,hyprland,nvim"
 fi
 
 if [[ -z $DOTFILES ]]; then
