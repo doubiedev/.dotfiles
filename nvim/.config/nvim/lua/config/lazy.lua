@@ -284,6 +284,9 @@ require("lazy").setup({
             opts = {
                 suppressed_dirs = { "~/", "~/projects", "~/Downloads", "/" },
                 -- log_level = 'debug',
+                auto_restore_enabled = true,
+                args_allow_single_directory = false, -- prevents hijacking cwd when using `nvim .`
+                args_allow_files_auto_save = false,  -- avoid saving odd sessions when editing single files
             },
         },
         {
@@ -291,7 +294,7 @@ require("lazy").setup({
             dependencies = {
                 "echasnovski/mini.icons"
             },
-            lazy = false,
+            lazy = true,
         },
         {
             "kdheepak/lazygit.nvim",
@@ -364,6 +367,7 @@ require("lazy").setup({
                 { "<leader>tv", "<cmd>VimBeGood<cr>", desc = "Open Vim Be Good" }
             }
         },
+        { "nvim-tree/nvim-web-devicons", opts = {} },
         -- {
         --     "windwp/nvim-ts-autotag",
         -- },
