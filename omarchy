@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ -z $STOW_FOLDERS ]]; then
-    STOW_FOLDERS="bin,tmux"
+    STOW_FOLDERS="hyprland"
 fi
 
 if [[ -z $DOTFILES ]]; then
