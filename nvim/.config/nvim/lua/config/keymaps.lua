@@ -15,11 +15,3 @@ vim.keymap.set("x", "<leader>p", "\"_dP", { desc = "Paste while keeping current 
 
 vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("i", "<C-[>", "<Esc>", { desc = "Exit insert mode" })
-
--- vim.keymap.set("n", "<M-h>", "<C-w>h", { desc = "Move to left split" })
--- vim.keymap.set("n", "<M-j>", "<C-w>j", { desc = "Move to below split" })
--- vim.keymap.set("n", "<M-k>", "<C-w>k", { desc = "Move to above split" })
--- vim.keymap.set("n", "<M-l>", "<C-w>l", { desc = "Move to right split" })
--- vim.keymap.set("n", "<M-q>", "<cmd>close<CR>", { desc = "Close split" })
--- vim.keymap.set("n", "<M-p>", "<C-w>p", { desc = "Switch to previous window" })
--- vim.keymap.set("n", "<M-w>", "<C-w>w", { desc = "Cycle through windows" })
