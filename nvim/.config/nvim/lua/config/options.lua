@@ -18,5 +18,7 @@ vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
 
+vim.opt.clipboard = ""
+
 -- Disable on startup
 vim.g.minipairs_disable = true
