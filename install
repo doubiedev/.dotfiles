@@ -14,3 +14,9 @@ for folder in $(echo "$STOW_FOLDERS" | sed "s/,/ /g"); do
 done
 
 popd
+
+if command -v hyprctl >/dev/null 2>&1; then
+    sleep 1
+    hyprctl reload
+    hyprctl reload
+fi
