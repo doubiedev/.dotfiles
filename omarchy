@@ -8,3 +8,5 @@ if [[ -z $DOTFILES ]]; then
 fi
 
 STOW_FOLDERS=$STOW_FOLDERS DOTFILES=$DOTFILES $DOTFILES/install
+
+# FIX: stow different files for different devices -> switch to nix home-manager?
