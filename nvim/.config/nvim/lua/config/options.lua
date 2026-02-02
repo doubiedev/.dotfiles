@@ -22,3 +22,6 @@ vim.opt.clipboard = ""
 
 -- Disable on startup
 vim.g.minipairs_disable = true
+
+-- Disable on startup to prevent crash: https://github.com/neovim/neovim/issues/27273 (When undoing new temporary buffer lines with mini diff signs)
+vim.g.minidiff_disable = true
