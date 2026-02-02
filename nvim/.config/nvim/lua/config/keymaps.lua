@@ -29,3 +29,7 @@ vim.keymap.set("i", "<C-[>", "<Esc>", { desc = "Exit insert mode" })
 
 -- Other
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable Q key" })
+
+-- ===PLUGINS===
+-- Supermaven
+vim.keymap.set("n", "<leader>C", ":SupermavenToggle<CR>", { desc = "Toggle AI code completion" })
