@@ -1,0 +1,240 @@
+#!/bin/bash
+# hypr — personal Hyprland overlay helper.
+#
+# Keeps your personal Hyprland config safe from Omarchy updates:
+#   - your settings live in ~/.config/hypr/personal/ (Omarchy never writes there)
+#   - hyprland.conf is stowed glue that sources personal/ last
+#   - daemon configs (hypridle/hyprlock/hyprsunset/xdph) are one-line shims
+#
+# Commands:
+#   ./hypr status      show who owns each ~/.config/hypr file
+#   ./hypr diff        show Omarchy Hyprland-default changes since last update
+#   ./hypr diff mine   show how your configs diverge from current defaults
+#   ./hypr restore     re-wire glue + shims (safe, idempotent)
+#   ./hypr backup      snapshot ~/.config/hypr
+#
+# Env: DOTFILES, OMARCHY, STATE
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+OMARCHY="${OMARCHY:-$HOME/.local/share/omarchy}"
+STATE="${STATE:-$HOME/.local/state/omarchy/hypr-updates}"
+HYPR_DIR="$HOME/.config/hypr"
+REPO_HYPR="$DOTFILES/hyprland/.config/hypr"
+
+SHIM_FILES="hypridle hyprlock hyprsunset xdph"
+
+usage() {
+    sed -n 's/^#   //p' "$0"
+}
+
+ts() {
+    date +%Y-%m-%d_%H-%M-%S
+}
+
+backup_file() {
+    local f="$1"
+    mkdir -p "$STATE/backups"
+    local dest="$STATE/backups/$(basename "$f").bak.$(ts)"
+    cp -a "$f" "$dest"
+    echo "    backed up to $dest"
+}
+
+cmd_restore() {
+    echo "Restoring personal Hyprland overlay..."
+    mkdir -p "$STATE"
+
+    # 1. Glue link: if a migration replaced the symlink with a regular file
+    #    (sed -i does this), back it up and re-link to the repo.
+    if [[ ! -L "$HYPR_DIR/hyprland.conf" ]] ||
+       [[ "$(readlink -f "$HYPR_DIR/hyprland.conf")" != "$REPO_HYPR/hyprland.conf" ]]; then
+        if [[ -e "$HYPR_DIR/hyprland.conf" ]]; then
+            echo "  hyprland.conf is not our symlink; backing up and re-linking"
+            backup_file "$HYPR_DIR/hyprland.conf"
+        fi
+        rm -f "$HYPR_DIR/hyprland.conf"
+        ln -sfn "$REPO_HYPR/hyprland.conf" "$HYPR_DIR/hyprland.conf"
+        echo "  linked hyprland.conf"
+    fi
+
+    # 2. Glue content: if the repo glue no longer sources the personal overlay
+    #    (an Omarchy migration wrote a default through the symlink), restore the
+    #    glue from git. personal/ is never touched by Omarchy, so edits there are
+    #    the user's own and are left alone.
+    if [[ -f "$REPO_HYPR/hyprland.conf" ]] &&
+       ! grep -q 'source = ~/.config/hypr/personal/\*\.conf' "$REPO_HYPR/hyprland.conf"; then
+        echo "  hyprland.conf no longer sources personal/; restoring from git"
+        backup_file "$REPO_HYPR/hyprland.conf"
+        (cd "$DOTFILES" && git checkout -- hyprland/.config/hypr/hyprland.conf)
+    fi
+
+    # 3. Personal dir link.
+    if [[ ! -L "$HYPR_DIR/personal" ]] ||
+       [[ "$(readlink -f "$HYPR_DIR/personal")" != "$REPO_HYPR/personal" ]]; then
+        if [[ -e "$HYPR_DIR/personal" ]]; then
+            echo "  personal/ is not our symlink; backing up and re-linking"
+            backup_file "$HYPR_DIR/personal"
+            rm -rf "$HYPR_DIR/personal"
+        fi
+        ln -sfn "$REPO_HYPR/personal" "$HYPR_DIR/personal"
+        echo "  linked personal/"
+    fi
+
+    # 4. Regenerate the daemon shims (top-level daemon configs source personal/daemons/).
+    for name in $SHIM_FILES; do
+        local live="$HYPR_DIR/$name.conf"
+        local expected="source = ~/.config/hypr/personal/daemons/$name.conf"
+        if [[ -f "$live" ]] && [[ "$(cat "$live")" != "$expected" ]]; then
+            echo "  $name.conf was modified (likely by an update); restoring shim"
+            backup_file "$live"
+        fi
+        printf '%s\n' "$expected" > "$live"
+    done
+
+    # 5. Materialize the omarchy-owned override files from Omarchy's defaults so
+    #    the glue's source lines resolve (silences "globbing error" configerrors).
+    for name in bindings input looknfeel autostart monitors; do
+        if [[ ! -f "$HYPR_DIR/$name.conf" ]] && [[ -f "$OMARCHY/config/hypr/$name.conf" ]]; then
+            cp "$OMARCHY/config/hypr/$name.conf" "$HYPR_DIR/$name.conf"
+            echo "  materialized omarchy-owned $name.conf"
+        fi
+    done
+
+    if command -v hyprctl >/dev/null 2>&1; then
+        hyprctl reload >/dev/null 2>&1 || true
+        echo "  hyprctl reload"
+    fi
+    echo "Done."
+}
+
+cmd_status() {
+    printf '%-24s %s\n' "FILE" "OWNER / STATUS"
+    printf '%-24s %s\n' "----" "-------------"
+    for f in "$HYPR_DIR"/*.conf; do
+        [[ -e "$f" ]] || continue
+        local base owner="omarchy-owned (disposable)"
+        base="$(basename "$f")"
+        case "$base" in
+            hyprland.conf)
+                if [[ -L "$f" ]] &&
+                   [[ "$(readlink -f "$f")" == "$REPO_HYPR/hyprland.conf" ]]; then
+                    owner="personal (stowed glue)"
+                else
+                    owner="PERSONAL GLUE — NOT LINKED"
+                fi
+                ;;
+            hypridle.conf|hyprlock.conf|hyprsunset.conf|xdph.conf)
+                owner="personal (shim)"
+                [[ "$(cat "$f")" == "source = ~/.config/hypr/personal/daemons/${base%.conf}.conf" ]] ||
+                    owner="PERSONAL (shim) — MODIFIED, run ./hypr restore"
+                ;;
+        esac
+        printf '%-24s %s\n' "$base" "$owner"
+    done
+    if [[ -L "$HYPR_DIR/personal" ]]; then
+        printf '%-24s %s\n' "personal/" "personal (stowed)"
+        for f in "$HYPR_DIR"/personal/*.conf; do
+            printf '    %-20s %s\n' "$(basename "$f")" "personal (stowed)"
+        done
+        if [[ -d "$HYPR_DIR/personal/daemons" ]]; then
+            printf '%-24s %s\n' "personal/daemons/" "personal (stowed)"
+            for f in "$HYPR_DIR"/personal/daemons/*.conf; do
+                printf '    %-20s %s\n' "$(basename "$f")" "personal (stowed)"
+            done
+        fi
+    else
+        printf '%-24s %s\n' "personal/" "PERSONAL DIR — NOT LINKED, run ./hypr restore"
+    fi
+}
+
+cmd_diff() {
+    if [[ ! -d "$OMARCHY/.git" ]]; then
+        echo "Omarchy is not a git checkout at $OMARCHY; nothing to diff."
+        return 0
+    fi
+    echo "=== Omarchy commits touching Hyprland (recent) ==="
+    git -C "$OMARCHY" log --oneline -8 -- default/hypr config/hypr || true
+    echo
+    echo "=== Hyprland default changes since the last update ==="
+    if git -C "$OMARCHY" diff HEAD@{1} HEAD --stat -- default/hypr config/hypr >/dev/null 2>&1; then
+        git -C "$OMARCHY" diff HEAD@{1} HEAD -- default/hypr config/hypr || true
+    else
+        echo "No previous Omarchy state found in reflog to diff against."
+    fi
+}
+
+cmd_diff_mine() {
+    local f live default
+    echo "=== Omarchy-owned files vs current defaults ==="
+    echo "(what 'omarchy refresh hyprland' would overwrite; omarchy wins, personal/ re-applies)"
+    for f in bindings input looknfeel autostart monitors; do
+        live="$HYPR_DIR/$f.conf"
+        default="$OMARCHY/config/hypr/$f.conf"
+        if [[ ! -f "$live" ]]; then
+            echo "-- $f.conf: not materialized (no top-level file)"
+            continue
+        fi
+        if diff -u "$default" "$live" >/dev/null 2>&1; then
+            echo "-- $f.conf: identical to default"
+        else
+            echo "-- $f.conf:"
+            diff -u "$default" "$live" || true
+        fi
+    done
+    echo
+    echo "=== Personal overrides vs current defaults ==="
+    for f in bindings input looknfeel autostart monitors; do
+        live="$HYPR_DIR/personal/$f.conf"
+        default="$OMARCHY/config/hypr/$f.conf"
+        if [[ ! -f "$live" ]]; then
+            echo "-- personal/$f.conf: missing"
+            continue
+        fi
+        if diff -u "$default" "$live" >/dev/null 2>&1; then
+            echo "-- personal/$f.conf: identical to default"
+        else
+            echo "-- personal/$f.conf:"
+            diff -u "$default" "$live" || true
+        fi
+    done
+    echo
+    echo "=== Personal daemon configs vs current defaults ==="
+    for f in hypridle hyprlock hyprsunset xdph; do
+        live="$HYPR_DIR/personal/daemons/$f.conf"
+        default="$OMARCHY/config/hypr/$f.conf"
+        if [[ ! -f "$live" ]]; then
+            echo "-- personal/daemons/$f.conf: missing"
+            continue
+        fi
+        if diff -u "$default" "$live" >/dev/null 2>&1; then
+            echo "-- personal/daemons/$f.conf: identical to default"
+        else
+            echo "-- personal/daemons/$f.conf:"
+            diff -u "$default" "$live" || true
+        fi
+    done
+}
+
+cmd_backup() {
+    mkdir -p "$STATE/backups"
+    local dest="$STATE/backups/hypr.$(ts)"
+    cp -a "$HYPR_DIR" "$dest"
+    echo "Backed up $HYPR_DIR -> $dest"
+}
+
+cmd="${1:-status}"
+case "$cmd" in
+    status) cmd_status ;;
+    diff)
+        if [[ "${2:-}" == "mine" ]]; then
+            cmd_diff_mine
+        else
+            cmd_diff
+        fi
+        ;;
+    restore) cmd_restore ;;
+    backup) cmd_backup ;;
+    help|-h|--help) usage ;;
+    *) echo "Unknown command: $cmd" >&2; usage >&2; exit 1 ;;
+esac

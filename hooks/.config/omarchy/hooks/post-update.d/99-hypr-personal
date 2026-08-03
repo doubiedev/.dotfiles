@@ -1,0 +1,28 @@
+#!/bin/bash
+# 99-hypr-personal — re-wire the personal Hyprland overlay after every update.
+#
+# Runs as an Omarchy post-update hook (~/.config/omarchy/hooks/post-update.d/).
+# Omarchy invokes it at the end of `omarchy update`, after migrations have run
+# but before services are restarted. It:
+#   1. restores the stowed glue + daemon shims (backing up anything replaced)
+#   2. saves a diff of what changed in Omarchy's Hyprland defaults
+#   3. notifies you where the report lives
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+REPORT_DIR="$HOME/.local/state/omarchy/hypr-updates"
+
+"$DOTFILES/hypr" restore
+
+mkdir -p "$REPORT_DIR"
+REPORT="$REPORT_DIR/$(date +%Y-%m-%d_%H-%M-%S).diff"
+{
+    echo "# Hyprland update report — $(date)"
+    echo
+    "$DOTFILES/hypr" diff
+} > "$REPORT" 2>&1 || true
+
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send "Hyprland update review" "Omarchy changed Hyprland defaults. Diff saved to $REPORT" 2>/dev/null || true
+fi
