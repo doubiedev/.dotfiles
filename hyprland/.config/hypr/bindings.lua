@@ -29,18 +29,21 @@ o.bind("SUPER + SHIFT + S", nil, "omarchy-capture-screenshot")
 o.bind("SUPER + PERIOD", nil, "omarchy-shell shell toggle omarchy.emojis")
 
 -- APPLICATIONS, TUIs, WEB APPS --
+hl.unbind("SUPER + SHIFT + B")
+o.bind("SUPER + SHIFT + B", "Brave", "brave")
+
 hl.unbind("SUPER + SHIFT + M")
 o.bind(
-	"SUPER + SHIFT + M",
-	"Music",
-	'omarchy-launch-or-focus-webapp "YouTube Music" "https://music.youtube.com/" --profile-directory="Music"'
+    "SUPER + SHIFT + M",
+    "Music",
+    'omarchy-launch-or-focus-webapp "YouTube Music" "https://music.youtube.com/" --profile-directory="Music"'
 )
 
 hl.unbind("SUPER + SHIFT + O")
 o.bind(
-	"SUPER + SHIFT + O",
-	"Obsidian",
-	'omarchy-launch-or-focus ^obsidian$ "uwsm-app -- obsidian --password-store=gnome-libsecret -disable-gpu --enable-wayland-ime"'
+    "SUPER + SHIFT + O",
+    "Obsidian",
+    'omarchy-launch-or-focus ^obsidian$ "uwsm-app -- obsidian --password-store=gnome-libsecret -disable-gpu --enable-wayland-ime"'
 )
 o.bind("SUPER + SHIFT + O", "Obsidian", { launch = "obsidian", focus = "^obsidian$" })
 
@@ -71,16 +74,16 @@ o.bind("SUPER + B", "Keybindings", "omarchy-menu-keybindings")
 -- Move focus with SUPER + (hjkl)
 hl.unbind("SUPER + CTRL + L") -- Lock system
 
-hl.unbind("SUPER + L") -- Toggle workspace layout
+hl.unbind("SUPER + L")        -- Toggle workspace layout
 o.bind("SUPER + ALT + T", "Toggle workspace layout", "omarchy-hyprland-workspace-layout-toggle")
 
 -- Toggle "notes" special workspace
 hl.unbind("SUPER + GRAVE")
 o.bind("SUPER + GRAVE", "Toggle notes scratchpad", hl.dsp.workspace.toggle_special("notes"))
 o.bind(
-	"SUPER + ALT + GRAVE",
-	"Move window to notes scratchpad",
-	hl.dsp.window.move({ workspace = "special:notes", follow = false })
+    "SUPER + ALT + GRAVE",
+    "Move window to notes scratchpad",
+    hl.dsp.window.move({ workspace = "special:notes", follow = false })
 )
 o.bind("SUPER + H", "Focus on left window", hl.dsp.focus({ direction = "l" }))
 o.bind("SUPER + L", "Focus on right window", hl.dsp.focus({ direction = "r" }))
