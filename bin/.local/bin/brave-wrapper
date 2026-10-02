@@ -1,8 +1,0 @@
-#!/bin/bash
-# Force Mesa (Intel) EGL so Chromium renders on the same GPU as Hyprland compositor.
-# By default, GLVND loads NVIDIA EGL first (10_nvidia.json priority),
-# but Hyprland composites on Intel (eDP-2 display) — causing cross-GPU DMA-BUF failures.
-# See: https://github.com/basecamp/omarchy/issues/4901
-export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json
-export LIBVA_DRIVER_NAME=iHD
-exec /usr/bin/brave "$@"
